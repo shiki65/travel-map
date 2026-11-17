@@ -15,6 +15,15 @@ main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-column
 .city-map-tools{display:flex;gap:7px;flex-wrap:wrap}
 .place-pin{font-size:27px;line-height:32px;text-align:center;filter:drop-shadow(0 2px 2px #0003)}
 .place-empty{padding:10px 16px;color:var(--muted);font-size:12px}
+.route-panel{padding:14px 16px;border-top:1px solid var(--line)}
+.route-heading{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px}
+.route-places{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.route-place{display:flex;align-items:center;gap:8px;background:#f8f6ef;padding:9px 10px;border-radius:10px;font-size:13px}
+.route-place input{accent-color:var(--green)}
+.route-actions{display:flex;gap:8px;margin-top:12px}
+.route-actions select{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fffefa;color:var(--ink)}
+.route-result{font-size:12px;line-height:1.8;margin-top:10px;color:var(--muted)}
+.route-result a{color:#557b60;font-weight:700}
 @media(max-width:900px){#cityMap{height:52vh;min-height:340px}}.side{display:flex;flex-direction:column;gap:14px}.card{padding:17px}.card h2{font-size:17px;margin:0 0 12px}.empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;background:#f8f6ef;border-radius:14px}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:12px;color:var(--muted);font-weight:650}.field input,.field textarea,.field select{border:1px solid var(--line);border-radius:11px;background:#fffefa;padding:10px 11px;color:var(--ink);outline:none;width:100%}.field textarea{min-height:74px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.city-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.city-title h2{font-size:21px;margin:0}.pill{font-size:11px;padding:5px 9px;border-radius:99px;background:var(--yellow);color:#76643c}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.stat{background:#f5f4eb;padding:11px;border-radius:13px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:19px;display:block;margin-top:4px}.subhead{font-size:12px;color:var(--muted);font-weight:700;margin:16px 0 7px}.list{padding-left:19px;margin:0;font-size:13px;line-height:1.8}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.city-list{display:flex;flex-direction:column;gap:7px;max-height:210px;overflow:auto}.city-item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;text-align:left;background:#fffefa;color:var(--ink)}.city-item.active{border-color:var(--green);background:#f2f6ef}.city-item small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.vote{background:#f8f4e8;color:#7a6738;border-radius:99px;padding:5px 8px;font-size:11px;white-space:nowrap}.comments{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}.comment{background:#f8f6ef;border-radius:12px;padding:9px 11px;font-size:12px}.comment b{display:block;margin-bottom:3px}.muted{color:var(--muted)}.footnote{font-size:11px;line-height:1.6;color:var(--muted);padding:0 18px 16px}.modal-back{position:fixed;inset:0;background:#26342f66;display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}.modal{background:var(--paper);border-radius:20px;padding:20px;width:min(520px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px;font-size:18px}.modal p{font-size:13px;color:var(--muted);line-height:1.6}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#34443b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;display:none;z-index:2000}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:12px}#map{height:52vh;min-height:340px}header{padding:13px 15px}}
 </style></head><body>
@@ -32,7 +41,23 @@ main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-column
     </div>
   </div>
   <div id="cityMap"></div>
-  <div class="place-empty" id="placeHint">选择城市后，可以在地图上标记美食、景点、住宿和购物地点。</div>
+<div class="place-empty" id="placeHint">选择城市后，可以在地图上标记美食、景点、住宿和购物地点。</div>
+
+<div class="route-panel">
+  <div class="route-heading">
+    <b>🧭 行程路线规划</b>
+    <span class="muted">选择至少两个地点</span>
+  </div>
+  <div id="routePlaces" class="route-places">添加地点后，就能在这里选择行程。</div>
+  <div class="route-actions">
+    <select id="routeMode">
+      <option value="walking">🚶 步行</option>
+      <option value="transit">🚆 公共交通</option>
+    </select>
+    <button id="routeBtn">规划路线</button>
+  </div>
+  <div id="routeResult" class="route-result"></div>
+</div>
 </section>
 </div>
 
@@ -52,8 +77,11 @@ const $=id=>document.getElementById(id),map=L.map('map').setView([35.8,105.5],4)
 let cityMap=null;
 let cityMapLayer=null;
 let places=[];
+let draftPlaceLat=null;
+let draftPlaceLng=null;
 let activePlaceCityId=null;
-
+let routeSelectedIds=new Set();
+let placeSearchData=[];
 const placeIcons={
   food:'🍜',
   attraction:'🏛️',
@@ -100,13 +128,16 @@ async function loadPlaces(cityId){
 }
 
 // 在城市地图上绘制标记
-function drawPlaces(cityId){
+ function drawPlaces(cityId){
   if(!cityMapLayer)return;
   cityMapLayer.clearLayers();
 
-  places.filter(p=>p.city_id===cityId).forEach(p=>{
+  const currentPlaces=places.filter(p=>p.city_id===cityId);
+
+  currentPlaces.forEach(p=>{
     const icon=placeIcons[p.category]||'📌';
     const marker=L.marker([p.lat,p.lng],{
+      draggable:true,
       icon:L.divIcon({
         html:`<div class="place-pin">${icon}</div>`,
         className:'',
@@ -119,8 +150,9 @@ function drawPlaces(cityId){
       ?'未填写':'¥'+Number(p.price).toLocaleString('zh-CN');
 
     marker.bindPopup(`
-      <div style="min-width:170px">
+      <div style="min-width:180px">
         <b>${esc(p.name)}</b>
+        <div style="margin-top:5px">${esc(p.address||'地址未填写')}</div>
         <div style="margin-top:5px">${esc(p.item||'暂无介绍')}</div>
         <div style="margin-top:5px">价格：${price}</div>
         <div style="margin-top:5px;color:#7d897f">${esc(p.notes||'')}</div>
@@ -130,12 +162,173 @@ function drawPlaces(cityId){
         </div>
       </div>
     `);
+
+    marker.on('dragend',async e=>{
+      const pos=e.target.getLatLng();
+      try{
+        const address=await reversePlaceAddress(pos.lat,pos.lng);
+        await rpc('update_travel_place',{
+          p_id:p.id,
+          p_patch:{
+            lat:pos.lat,
+            lng:pos.lng,
+            address:address||p.address||''
+          }
+        });
+        await loadPlaces(cityId);
+        toast('地点位置已更新');
+      }catch(err){
+        toast('位置更新失败：'+err.message);
+        await loadPlaces(cityId);
+      }
+    });
   });
 
-  const count=places.filter(p=>p.city_id===cityId).length;
-  $('placeHint').textContent=`当前城市共有 ${count} 个地点标记 · 点击地图空白位置即可添加`;
+  $('placeHint').textContent=`当前城市共有 ${currentPlaces.length} 个地点标记 · 可以拖动图标调整位置`;
+
+  renderRouteChoices(cityId);
+}
+// 地点搜索结果
+window.searchPlaceLocation=async()=>{
+  const name=$('placeName').value.trim();
+  const address=$('placeAddress').value.trim();
+  const city=cities.find(c=>c.id===selectedId);
+
+  const keyword=address||name;
+  if(!keyword){
+    toast('请先填写地点名称或地址');
+    return;
+  }
+
+  const query=[keyword,city?.name].filter(Boolean).join(' ');
+
+  try{
+    toast('正在搜索地点…');
+
+    const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=zh-CN&q='+encodeURIComponent(query);
+
+    const res=await fetch(url);
+    if(!res.ok)throw Error('地图搜索暂时不可用');
+
+    const data=await res.json();
+    if(!data.length)throw Error('没有找到位置，请尝试填写更详细的地址');
+
+    placeSearchData=data;
+
+    $('placeSearchResults').innerHTML=data.map((p,i)=>`
+      <button class="secondary"
+        style="display:block;width:100%;text-align:left;margin-top:7px;font-size:12px"
+        onclick="selectPlaceSearchResult(${i})">
+        ${esc(p.name||p.display_name.split(',')[0])}
+        <div style="font-weight:400;margin-top:4px">
+          ${esc(p.display_name)}
+        </div>
+      </button>
+    `).join('');
+
+    toast('请选择正确的地点位置');
+  }catch(e){
+    toast('搜索失败：'+e.message);
+  }
+};
+
+// 选择搜索结果
+window.selectPlaceSearchResult=i=>{
+  const p=placeSearchData[i];
+  if(!p)return;
+
+  draftPlaceLat=Number(p.lat);
+  draftPlaceLng=Number(p.lon);
+
+  $('placeAddress').value=p.display_name;
+
+  if(cityMap){
+    cityMap.setView([draftPlaceLat,draftPlaceLng],17);
+  }
+
+  toast('位置已选定，请核对地图位置');
+};
+
+// 根据坐标查询详细地址
+async function reversePlaceAddress(lat,lng){
+  try{
+    const url='https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+lat+'&lon='+lng+'&accept-language=zh-CN';
+
+    const res=await fetch(url);
+    if(!res.ok)return '';
+
+    const data=await res.json();
+    return data.display_name||'';
+  }catch(e){
+    console.error('地址识别失败',e);
+    return '';
+  }
 }
 
+// 显示当前城市的路线选择清单
+function renderRouteChoices(cityId){
+  const currentPlaces=places.filter(p=>p.city_id===cityId);
+
+  $('routePlaces').innerHTML=currentPlaces.length
+    ?currentPlaces.map(p=>`
+      <label class="route-place">
+        <input type="checkbox"
+          ${routeSelectedIds.has(p.id)?'checked':''}
+          onchange="toggleRoutePlace('${p.id}',this.checked)">
+        <span>${placeIcons[p.category]||'📌'} ${esc(p.name)}</span>
+      </label>
+    `).join('')
+    :'添加地点后，就能在这里选择行程。';
+}
+
+// 选择或取消路线地点
+window.toggleRoutePlace=(id,checked)=>{
+  if(checked){
+    routeSelectedIds.add(id);
+  }else{
+    routeSelectedIds.delete(id);
+  }
+};
+
+// 生成地图导航链接
+$('routeBtn').onclick=()=>{
+  const selected=places.filter(p=>
+    p.city_id===selectedId&&routeSelectedIds.has(p.id)
+  );
+
+  if(selected.length<2){
+    toast('请至少选择两个地点');
+    return;
+  }
+
+  const origin=selected[0];
+  const destination=selected[selected.length-1];
+  const mode=$('routeMode').value;
+
+  const params=new URLSearchParams({
+    api:'1',
+    origin:`${origin.lat},${origin.lng}`,
+    destination:`${destination.lat},${destination.lng}`,
+    travelmode:mode==='transit'?'transit':'walking'
+  });
+
+  if(selected.length>2){
+    params.set(
+      'waypoints',
+      selected.slice(1,-1).map(p=>`${p.lat},${p.lng}`).join('|')
+    );
+  }
+
+  const url='https://www.google.com/maps/dir/?'+params.toString();
+
+  $('routeResult').innerHTML=`
+    已选择 ${selected.length} 个地点，路线顺序按勾选顺序排列。
+    <br>
+    <a href=" " target="_blank" rel="noopener">
+      打开 Google 地图查看${mode==='transit'?'公共交通':'步行'}路线 →
+    </a >
+  `;
+};
 // 添加地点表单
 window.openAddPlace=(lat,lng)=>{
   if(!selectedId){
@@ -164,6 +357,13 @@ window.openAddPlace=(lat,lng)=>{
     </div>
 
     <div class="field">
+      <label>地点地址</label>
+      <input id="placeAddress" placeholder="请输入详细地址">
+      <button class="secondary" onclick="searchPlaceLocation()">搜索位置</button>
+      <div id="placeSearchResults"></div>
+    </div>
+
+    <div class="field">
       <label>主要内容 / 介绍</label>
       <input id="placeItem" placeholder="例如：锅包肉、东北菜">
     </div>
@@ -183,6 +383,9 @@ window.openAddPlace=(lat,lng)=>{
       <button onclick="createPlace(${lat},${lng})">保存地点</button>
     </div>
   `);
+
+  draftPlaceLat=lat;
+  draftPlaceLng=lng;
 };
 
 // 保存新地点
@@ -208,8 +411,9 @@ window.createPlace=async(lat,lng)=>{
     item:$('placeItem').value.trim(),
     price:priceText===''?null:Number(priceText),
     notes:$('placeNotes').value.trim(),
-    lat,
-    lng
+    address:$('placeAddress').value.trim(),
+    lat:draftPlaceLat??lat,
+    lng:draftPlaceLng??lng
   };
 
   try{
@@ -226,6 +430,9 @@ window.createPlace=async(lat,lng)=>{
 window.editPlace=id=>{
   const p=places.find(x=>x.id===id);
   if(!p)return;
+
+  draftPlaceLat=Number(p.lat);
+  draftPlaceLng=Number(p.lng);
 
   modal(`
     <h2>编辑地点</h2>
@@ -244,6 +451,13 @@ window.editPlace=id=>{
     <div class="field">
       <label>地点名称</label>
       <input id="placeName" value="${esc(p.name)}">
+    </div>
+
+    <div class="field">
+      <label>地点地址</label>
+      <input id="placeAddress" value="${esc(p.address||'')}">
+      <button class="secondary" onclick="searchPlaceLocation()">搜索位置</button>
+      <div id="placeSearchResults"></div>
     </div>
 
     <div class="field">
@@ -288,7 +502,10 @@ window.savePlace=async id=>{
     category:$('placeCategory').value,
     item:$('placeItem').value.trim(),
     price:priceText===''?null:Number(priceText),
-    notes:$('placeNotes').value.trim()
+    notes:$('placeNotes').value.trim(),
+    address:$('placeAddress').value.trim(),
+    lat:draftPlaceLat,
+    lng:draftPlaceLng
   };
 
   try{
@@ -313,16 +530,7 @@ window.deletePlace=async id=>{
     toast('删除失败：'+e.message);
   }
 };
-
-// 点击添加地点按钮，在当前地图中心放置标记
-$('addPlaceBtn').onclick=()=>{
-  if(!selectedId||!cityMap){
-    toast('请先选择一个城市');
-    return;
-  }
-  const center=cityMap.getCenter();
-  openAddPlace(center.lat,center.lng);
-};// 切换城市地图
+// 切换城市地图
 async function showCityMap(city){
   initCityMap();
 
