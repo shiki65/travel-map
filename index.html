@@ -24,6 +24,7 @@ main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-column
 .route-actions select{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fffefa;color:var(--ink)}
 .route-result{font-size:12px;line-height:1.8;margin-top:10px;color:var(--muted)}
 .route-result a{color:#557b60;font-weight:700}
+.wish-tabs{display:flex;gap:8px;margin-bottom:12px}.wish-tabs button{flex:1}.wish-list{display:flex;flex-direction:column;gap:8px}.wish-row{display:flex;align-items:flex-start;gap:8px;background:#f8f6ef;padding:10px;border-radius:12px}.wish-row input{margin-top:5px;accent-color:var(--green)}.wish-info{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px}.wish-done{text-decoration:line-through;color:var(--muted)}.wish-meta{font-size:11px;color:var(--muted);margin-top:4px}.wish-actions{display:flex;gap:4px}.wish-actions button{padding:5px 8px;font-size:11px}.wish-form{margin-top:12px}.wish-form button{width:100%}
 @media(max-width:900px){#cityMap{height:52vh;min-height:340px}}.side{display:flex;flex-direction:column;gap:14px}.card{padding:17px}.card h2{font-size:17px;margin:0 0 12px}.empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;background:#f8f6ef;border-radius:14px}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:12px;color:var(--muted);font-weight:650}.field input,.field textarea,.field select{border:1px solid var(--line);border-radius:11px;background:#fffefa;padding:10px 11px;color:var(--ink);outline:none;width:100%}.field textarea{min-height:74px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.city-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.city-title h2{font-size:21px;margin:0}.pill{font-size:11px;padding:5px 9px;border-radius:99px;background:var(--yellow);color:#76643c}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.stat{background:#f5f4eb;padding:11px;border-radius:13px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:19px;display:block;margin-top:4px}.subhead{font-size:12px;color:var(--muted);font-weight:700;margin:16px 0 7px}.list{padding-left:19px;margin:0;font-size:13px;line-height:1.8}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.city-list{display:flex;flex-direction:column;gap:7px;max-height:210px;overflow:auto}.city-item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;text-align:left;background:#fffefa;color:var(--ink)}.city-item.active{border-color:var(--green);background:#f2f6ef}.city-item small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.vote{background:#f8f4e8;color:#7a6738;border-radius:99px;padding:5px 8px;font-size:11px;white-space:nowrap}.comments{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}.comment{background:#f8f6ef;border-radius:12px;padding:9px 11px;font-size:12px}.comment b{display:block;margin-bottom:3px}.muted{color:var(--muted)}.footnote{font-size:11px;line-height:1.6;color:var(--muted);padding:0 18px 16px}.modal-back{position:fixed;inset:0;background:#26342f66;display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}.modal{background:var(--paper);border-radius:20px;padding:20px;width:min(520px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px;font-size:18px}.modal p{font-size:13px;color:var(--muted);line-height:1.6}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#34443b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;display:none;z-index:2000}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:12px}#map{height:52vh;min-height:340px}header{padding:13px 15px}}
 </style></head><body>
@@ -46,13 +47,13 @@ main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-column
 <div class="route-panel">
   <div class="route-heading">
     <b>🧭 行程路线规划</b>
-    <span class="muted">选择至少两个地点</span>
+    <span class="muted">按勾选顺序排列，可用 ↑↓ 调整</span>
   </div>
   <div id="routePlaces" class="route-places">添加地点后，就能在这里选择行程。</div>
   <div class="route-actions">
     <select id="routeMode">
       <option value="walking">🚶 步行</option>
-      <option value="transit">🚆 公共交通</option>
+      <option value="transit">🚆 公共交通（高德导航）</option>
     </select>
     <button id="routeBtn">规划路线</button>
   </div>
@@ -63,6 +64,21 @@ main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-column
 
 <aside class="side"><section class="panel card"><h2 class="section-title">城市候选清单 <span class="muted" id="cityCount">0 个</span></h2><div class="city-list" id="cityList"><div class="empty">地图上还没有城市。</div></div></section>
 <section class="panel card" id="detailPanel"><div class="empty">选择地图上的一个城市，这里就会显示旅行档案。</div></section>
+<section class="panel card" id="wishlistPanel">
+<h2>🎒 旅行心愿清单 <span class="muted" id="wishCount" style="font-size:12px">0 项</span></h2>
+<div class="wish-tabs"><button class="secondary" id="wishPackingTab" onclick="switchWishTab('packing')">🎒 要带的</button><button class="ghost" id="wishShoppingTab" onclick="switchWishTab('shopping')">🛍️ 想买的</button></div>
+<div class="wish-list" id="wishList"><div class="empty">加入旅行房间后，就可以和朋友一起整理清单啦。</div></div>
+<div class="wish-form">
+<div class="field"><label id="wishNameLabel">物品名称</label><input id="wishName" maxlength="120" placeholder="例如：充电宝"></div>
+<div id="wishShoppingFields" style="display:none">
+<div class="field"><label>关联店铺（可不选）</label><select id="wishPlace"><option value="">不关联店铺</option></select></div>
+<div class="field"><label>购买地点（可手动填写）</label><input id="wishShop" maxlength="160" placeholder="例如：中央大街某家店"></div>
+<div class="field"><label>预计价格（元，可不填）</label><input id="wishPrice" type="number" min="0" step="0.01" placeholder="例如：35"></div>
+</div>
+<div class="field"><label>备注（可不填）</label><input id="wishNotes" maxlength="300" placeholder="例如：别忘记带充电线"></div>
+<button id="wishAddBtn" onclick="addWishItem()">＋ 添加到共享清单</button>
+</div><p class="hint">同一旅行房间的朋友都能添加、勾选、修改和删除，约 5 秒自动同步。</p>
+</section>
 <section class="panel card"><h2>大家的讨论</h2><div class="comments" id="comments"><div class="empty">还没有留言。</div></div><div class="field"><label>你的名字</label><input id="commentName" placeholder="例如：小四"></div><div class="field"><label>留言</label><textarea id="commentText" placeholder="我觉得……"></textarea></div><button id="sendComment">发送留言</button></section>
 <section class="panel card"><h2>预算快速比较</h2><div id="budgetSummary" class="empty">添加城市并填写预算后，这里会自动比较人均费用。</div></section></aside></main>
 <div class="footnote">提示：交通费和预算由成员手动填写，实际票价请以购票平台为准。每个旅行房间使用独立的房间密钥；请只分享给同行朋友。地图底图由 OpenStreetMap 提供。</div>
@@ -83,6 +99,9 @@ let activePlaceCityId=null;
 let routeSelectedIds=new Set();
 let routeLine=null;
 let placeSearchData=[];
+let wishItems=[];
+let wishTab="packing";
+let wishBusy=false;
 const placeIcons={
   food:'🍜',
   attraction:'🏛️',
@@ -188,6 +207,7 @@ async function loadPlaces(cityId){
   $('placeHint').textContent=`当前城市共有 ${currentPlaces.length} 个地点标记 · 可以拖动图标调整位置`;
 
   renderRouteChoices(cityId);
+  refreshWishPlaces();
 }
 // 地点搜索结果
 window.searchPlaceLocation=async()=>{
@@ -333,34 +353,33 @@ $('routeBtn').onclick=async()=>{
     selected.map(p=>[Number(p.lat),Number(p.lng)])
   );
 
-  // 公共交通：先显示地点顺序和示意连线
+  // 公共交通：逐段打开高德地图的真实公交/地铁路线规划。
+  // 高德 URI 公交模式不支持多个途经点，因此按用户指定顺序逐段导航。
   if(mode==='transit'){
-    routeLine=L.polyline(
-      selected.map(p=>[Number(p.lat),Number(p.lng)]),
-      {
-        color:'#b58b70',
-        weight:5,
-        opacity:0.85,
-        dashArray:'8 8'
-      }
-    ).addTo(cityMap);
-
     cityMap.fitBounds(bounds,{padding:[35,35]});
-
+    const amapUrl=(from,to)=>{
+      const point=p=>[Number(p.lng),Number(p.lat),p.name].join(',');
+      const params=new URLSearchParams({
+        from:point(from),to:point(to),mode:'bus',policy:'0',src:'travel-map',callnative:'0'
+      });
+      return 'https://uri.amap.com/navigation?'+params.toString();
+    };
+    const legs=selected.slice(0,-1).map((from,i)=>({from,to:selected[i+1]}));
     $('routeResult').innerHTML=`
-      <b>公共交通行程示意</b>
-      <div style="margin-top:8px">
-        ${selected.map((p,i)=>`
-          <div style="margin:5px 0">
-            ${i+1}. ${esc(p.name)}
-          </div>
-        `).join('')}
-      </div>
-      <p style="color:#9a765e;font-size:12px;margin-top:10px">
-        虚线仅表示地点顺序，不代表实际公交或地铁线路。
-        当前版本尚未接入实时公交或地铁换乘数据，请勿将虚线当作实际交通线路。
-      </p >
+      <b>公共交通 · 逐段查询真实路线</b>
+      <div style="margin-top:8px;color:#7d897f">已按选择顺序生成 ${legs.length} 段行程。点击下方按钮，在高德地图查看公交、地铁、换乘及预计时间。</div>
+      ${legs.map((leg,i)=>`
+        <div style="margin-top:10px;padding:11px;background:#f8f6ef;border-radius:12px">
+          <div style="font-weight:650;color:#34443b">第 ${i+1} 段：${esc(leg.from.name)} → ${esc(leg.to.name)}</div>
+          <a href="${esc(amapUrl(leg.from,leg.to))}" target="_blank" rel="noopener noreferrer"
+            style="display:inline-block;margin-top:7px;padding:7px 11px;background:#e8efe6;border-radius:9px;text-decoration:none;color:#456a51">打开高德公交路线 ↗</a>
+        </div>
+      `).join('')}
+      <p style="font-size:12px;margin-top:12px;color:#8b786b">
+        公交线路、换乘及耗时以高德实际查询为准。地图标记来自 OpenStreetMap，国内坐标系可能存在偏差，请在高德页面核对起终点。
+      </p>
     `;
+    toast('已生成高德公交导航链接');
     return;
   }
 
@@ -697,7 +716,76 @@ $('inviteBtn').onclick=async()=>{
     $('inviteText').select();
   }
 };
-async function loadAll(){try{const d=await rpc('get_travel_data');cities=d.cities||[];comments=d.comments||[];render();renderComments();$('syncStatus').textContent='在线同步中（约 5 秒刷新）'}catch(e){$('syncStatus').textContent='同步异常：'+e.message;throw e}}
+
+// 多人共享旅行心愿清单：通过房间密钥调用数据库函数，不直接开放表写入权限。
+window.switchWishTab=tab=>{
+  wishTab=tab==='shopping'?'shopping':'packing';
+  $('wishPackingTab').className=wishTab==='packing'?'secondary':'ghost';
+  $('wishShoppingTab').className=wishTab==='shopping'?'secondary':'ghost';
+  $('wishShoppingFields').style.display=wishTab==='shopping'?'block':'none';
+  $('wishName').placeholder=wishTab==='shopping'?'例如：冰箱贴、徽章':'例如：充电宝、身份证';
+  renderWishList();
+};
+function refreshWishPlaces(){
+  const el=$('wishPlace');if(!el)return;
+  const previous=el.value;
+  el.innerHTML='<option value="">不关联店铺</option>'+places.filter(p=>!selectedId||p.city_id===selectedId).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+  if([...el.options].some(o=>o.value===previous))el.value=previous;
+}
+function renderWishList(){
+  const shown=wishItems.filter(x=>x.kind===wishTab);
+  $('wishCount').textContent=wishItems.length+' 项';
+  $('wishList').innerHTML=!roomCode?'<div class="empty">先加入旅行房间，就能和朋友共享清单。</div>':!shown.length?'<div class="empty">还没有物品，先添加第一项吧。</div>':shown.map(x=>{
+    const place=places.find(p=>p.id===x.place_id);
+    const loc=place?.name||x.shop_name||'';
+    const price=x.price===null||x.price===undefined?'':' · 预计 ¥'+Number(x.price).toLocaleString('zh-CN');
+    return `<div class="wish-row"><input type="checkbox" ${x.done?'checked':''} onchange="toggleWishItem('${x.id}',this.checked)" aria-label="完成 ${esc(x.name)}"><div class="wish-info"><div class="${x.done?'wish-done':''}">${esc(x.name)}</div>${loc||price?`<div class="wish-meta">${loc?'📍 '+esc(loc):''}${price}</div>`:''}${x.notes?`<div class="wish-meta">${esc(x.notes)}</div>`:''}</div><div class="wish-actions"><button class="secondary" onclick="editWishItem('${x.id}')">编辑</button><button class="danger" onclick="deleteWishItem('${x.id}')">删除</button></div></div>`;
+  }).join('');
+  refreshWishPlaces();
+}
+async function reloadWishItems(){
+  if(!roomCode||!db)return;
+  try{
+    const data=await rpc('get_travel_wishlist');
+    wishItems=Array.isArray(data)?data:[];
+    renderWishList();
+  }catch(e){console.error('清单读取失败',e);$('wishList').innerHTML='<div class="empty">共享清单暂时无法读取，请确认已执行新版 SQL：'+esc(e.message)+'</div>';}
+}
+window.addWishItem=async()=>{
+  if(!roomCode){toast('请先加入旅行房间');return;}
+  if(wishBusy)return;
+  const name=$('wishName').value.trim();if(!name){toast('请填写物品名称');return;}
+  const priceText=$('wishPrice').value.trim();
+  if(wishTab==='shopping'&&priceText!==''&&(!Number.isFinite(Number(priceText))||Number(priceText)<0)){toast('请填写正确的价格');return;}
+  const item={id:crypto.randomUUID(),kind:wishTab,name,done:false,notes:$('wishNotes').value.trim(),place_id:wishTab==='shopping'?($('wishPlace').value||null):null,shop_name:wishTab==='shopping'?$('wishShop').value.trim():'',price:wishTab==='shopping'&&priceText!==''?Number(priceText):null};
+  wishBusy=true;
+  try{await rpc('upsert_travel_wishlist_item',{p_item:item});$('wishName').value='';$('wishNotes').value='';$('wishShop').value='';$('wishPrice').value='';$('wishPlace').value='';await reloadWishItems();toast('已添加到共享清单');}
+  catch(e){toast('添加失败：'+e.message);}finally{wishBusy=false;}
+};
+window.toggleWishItem=async(id,done)=>{
+  const item=wishItems.find(x=>x.id===id);if(!item)return;
+  try{await rpc('upsert_travel_wishlist_item',{p_item:{...item,done}});await reloadWishItems();}
+  catch(e){toast('更新失败：'+e.message);renderWishList();}
+};
+window.editWishItem=id=>{
+  const x=wishItems.find(i=>i.id===id);if(!x)return;
+  const options=places.map(p=>`<option value="${esc(p.id)}" ${x.place_id===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  modal(`<h2>编辑心愿清单</h2><div class="field"><label>物品名称</label><input id="editWishName" maxlength="120" value="${esc(x.name)}"></div>${x.kind==='shopping'?`<div class="field"><label>关联地点（可不选）</label><select id="editWishPlace"><option value="">不关联地点</option>${options}</select></div><div class="field"><label>购买地点</label><input id="editWishShop" maxlength="160" value="${esc(x.shop_name||'')}"></div><div class="field"><label>预计价格（元）</label><input id="editWishPrice" type="number" min="0" step="0.01" value="${x.price??''}"></div>`:''}<div class="field"><label>备注</label><textarea id="editWishNotes" maxlength="300">${esc(x.notes||'')}</textarea></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="saveWishItem('${x.id}')">保存修改</button></div>`);
+};
+window.saveWishItem=async id=>{
+  const old=wishItems.find(x=>x.id===id);if(!old)return;
+  const name=$('editWishName').value.trim();if(!name){toast('请填写物品名称');return;}
+  const priceText=old.kind==='shopping'?$('editWishPrice').value.trim():'';
+  if(priceText!==''&&(!Number.isFinite(Number(priceText))||Number(priceText)<0)){toast('价格不正确');return;}
+  const item={...old,name,notes:$('editWishNotes').value.trim(),place_id:old.kind==='shopping'?($('editWishPlace').value||null):null,shop_name:old.kind==='shopping'?$('editWishShop').value.trim():'',price:old.kind==='shopping'&&priceText!==''?Number(priceText):null};
+  try{await rpc('upsert_travel_wishlist_item',{p_item:item});closeModal();await reloadWishItems();toast('清单已更新');}catch(e){toast('保存失败：'+e.message);}
+};
+window.deleteWishItem=async id=>{
+  if(!confirm('确定从共享清单中删除这项物品吗？'))return;
+  try{await rpc('delete_travel_wishlist_item',{p_id:id});await reloadWishItems();toast('已删除');}catch(e){toast('删除失败：'+e.message);}
+};
+
+async function loadAll(){try{const d=await rpc('get_travel_data');cities=d.cities||[];comments=d.comments||[];render();await reloadWishItems();renderComments();$('syncStatus').textContent='在线同步中（约 5 秒刷新）'}catch(e){$('syncStatus').textContent='同步异常：'+e.message;throw e}}
 function render(){Object.values(pins).forEach(p=>map.removeLayer(p));Object.keys(pins).forEach(k=>delete pins[k]);cities.forEach(c=>{const m=L.marker([c.lat,c.lng]).addTo(map).bindTooltip(esc(c.name));m.on('click',()=>showDetail(c.id));pins[c.id]=m});$('cityCount').textContent=cities.length+' 个';$('cityList').innerHTML=cities.length?cities.map(c=>`<button class="city-item ${c.id===selectedId?'active':''}" onclick="showDetail('${c.id}')"><span><b>${esc(c.name)}</b><small>${esc(c.status||'考虑中')} · 交通 ${money(c.transport)}</small></span><span class="vote">♥ ${c.votes||0}</span></button>`).join(''):'<div class="empty">地图上还没有城市。先把心动目的地标出来吧。</div>';renderBudget();if(selectedId&&cities.some(c=>c.id===selectedId))showDetail(selectedId);else if(!selectedId)$('detailPanel').innerHTML='<div class="empty">选择地图上的一个城市，这里就会显示旅行档案。</div>'}
 function showDetail(id){selectedId=id;const c=cities.find(x=>x.id===id);if(!c)return;showCityMap(c);const total=[c.transport,c.hotel,c.other_cost].every(x=>x!==null&&x!==undefined&&x!=='')?[c.transport,c.hotel,c.other_cost].reduce((a,b)=>a+Number(b),0):null;$('detailPanel').innerHTML=`<div class="city-title"><h2>${esc(c.name)}</h2><span class="pill">${esc(c.status||'考虑中')}</span></div><div class="stats"><div class="stat"><small>人均交通费</small><strong>${money(c.transport)}</strong></div><div class="stat"><small>人均住宿预算</small><strong>${money(c.hotel)}</strong></div><div class="stat"><small>其他预算</small><strong>${money(c.other_cost)}</strong></div><div class="stat"><small>预计人均合计</small><strong>${money(total)}</strong></div></div><div class="subhead">想去的景点</div><ul class="list">${(c.attractions||[]).length?c.attractions.map(x=>'<li>'+esc(x)+'</li>').join(''):'<li class="muted">还没添加景点</li>'}</ul><div class="subhead">交通 / 旅行备注</div><div style="font-size:13px;line-height:1.7;white-space:pre-wrap">${esc(c.notes||'暂无备注')}</div><div class="actions"><button onclick="voteCity('${c.id}')">♥ 我想去（${c.votes||0}）</button><button class="secondary" onclick="editCity('${c.id}')">编辑档案</button><button class="danger" onclick="deleteCity('${c.id}')">删除</button></div>`;document.querySelectorAll('.city-item').forEach(el=>el.classList.remove('active'));const active=[...document.querySelectorAll('.city-item')].find(el=>el.getAttribute('onclick')===`showDetail('${id}')`);if(active)active.classList.add('active')}
 async function addAt(lat,lng){
