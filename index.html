@@ -41,8 +41,48 @@ $('inviteBtn').onclick=()=>{if(!roomCode){toast('请先创建或加入房间');o
 async function loadAll(){try{const d=await rpc('get_travel_data');cities=d.cities||[];comments=d.comments||[];render();renderComments();$('syncStatus').textContent='在线同步中（约 5 秒刷新）'}catch(e){$('syncStatus').textContent='同步异常：'+e.message;throw e}}
 function render(){Object.values(pins).forEach(p=>map.removeLayer(p));Object.keys(pins).forEach(k=>delete pins[k]);cities.forEach(c=>{const m=L.marker([c.lat,c.lng]).addTo(map).bindTooltip(esc(c.name));m.on('click',()=>showDetail(c.id));pins[c.id]=m});$('cityCount').textContent=cities.length+' 个';$('cityList').innerHTML=cities.length?cities.map(c=>`<button class="city-item ${c.id===selectedId?'active':''}" onclick="showDetail('${c.id}')"><span><b>${esc(c.name)}</b><small>${esc(c.status||'考虑中')} · 交通 ${money(c.transport)}</small></span><span class="vote">♥ ${c.votes||0}</span></button>`).join(''):'<div class="empty">地图上还没有城市。先把心动目的地标出来吧。</div>';renderBudget();if(selectedId&&cities.some(c=>c.id===selectedId))showDetail(selectedId);else if(!selectedId)$('detailPanel').innerHTML='<div class="empty">选择地图上的一个城市，这里就会显示旅行档案。</div>'}
 function showDetail(id){selectedId=id;const c=cities.find(x=>x.id===id);if(!c)return;const total=[c.transport,c.hotel,c.other_cost].every(x=>x!==null&&x!==undefined&&x!=='')?[c.transport,c.hotel,c.other_cost].reduce((a,b)=>a+Number(b),0):null;$('detailPanel').innerHTML=`<div class="city-title"><h2>${esc(c.name)}</h2><span class="pill">${esc(c.status||'考虑中')}</span></div><div class="stats"><div class="stat"><small>人均交通费</small><strong>${money(c.transport)}</strong></div><div class="stat"><small>人均住宿预算</small><strong>${money(c.hotel)}</strong></div><div class="stat"><small>其他预算</small><strong>${money(c.other_cost)}</strong></div><div class="stat"><small>预计人均合计</small><strong>${money(total)}</strong></div></div><div class="subhead">想去的景点</div><ul class="list">${(c.attractions||[]).length?c.attractions.map(x=>'<li>'+esc(x)+'</li>').join(''):'<li class="muted">还没添加景点</li>'}</ul><div class="subhead">交通 / 旅行备注</div><div style="font-size:13px;line-height:1.7;white-space:pre-wrap">${esc(c.notes||'暂无备注')}</div><div class="actions"><button onclick="voteCity('${c.id}')">♥ 我想去（${c.votes||0}）</button><button class="secondary" onclick="editCity('${c.id}')">编辑档案</button><button class="danger" onclick="deleteCity('${c.id}')">删除</button></div>`;document.querySelectorAll('.city-item').forEach(el=>el.classList.remove('active'));const active=[...document.querySelectorAll('.city-item')].find(el=>el.getAttribute('onclick')===`showDetail('${id}')`);if(active)active.classList.add('active')}
-function addAt(lat,lng){modal(`<h2>添加候选城市</h2><p>填写城市名称，再补充交通、景点和预算。</p><div class="field"><label>城市名称</label><input id="newName" placeholder="例如：哈尔滨"></div><div class="two"><div class="field"><label>纬度</label><input id="newLat" value="${lat.toFixed(5)}"></div><div class="field"><label>经度</label><input id="newLng" value="${lng.toFixed(5)}"></div></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="createCity()">添加城市</button></div>`)}
-window.createCity=async()=>{const name=$('newName').value.trim(),lat=Number($('newLat').value),lng=Number($('newLng').value);if(!name){toast('请填写城市名称');return}const c={id:crypto.randomUUID(),name,lat,lng,status:'考虑中',transport:null,hotel:null,other_cost:null,attractions:[],notes:'',votes:0};try{await rpc('add_travel_city',{p_city:c});await loadAll();selectedId=c.id;closeModal();showDetail(c.id);toast('城市已添加')}catch(e){toast('添加失败：'+e.message)}};
+async function addAt(lat,lng){
+  modal(`<h2>添加候选城市</h2>
+  <p>输入城市名称，自动搜索准确位置；也可以手动调整坐标。</p >
+  <div class="field">
+    <label>城市名称</label>
+    <input id="newName" placeholder="例如：哈尔滨">
+  </div>
+  <button class="secondary" onclick="searchCityLocation()">搜索城市位置</button>
+  <div class="two">
+    <div class="field"><label>纬度</label><input id="newLat" value="${lat.toFixed(5)}"></div>
+    <div class="field"><label>经度</label><input id="newLng" value="${lng.toFixed(5)}"></div>
+  </div>
+  <div class="modal-actions">
+    <button class="ghost" onclick="closeModal()">取消</button>
+    <button onclick="createCity()">添加城市</button>
+  </div>`);
+}
+
+window.searchCityLocation=async()=>{
+  const name=$('newName').value.trim();
+  if(!name){toast('请先填写城市名称');return}
+  try{
+    toast('正在搜索城市位置…');
+    const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=zh-CN&q='+encodeURIComponent(name);
+    const res=await fetch(url);
+    if(!res.ok)throw Error('地图搜索暂时不可用');
+    const data=await res.json();
+    if(!data.length)throw Error('没有找到这个城市，请换个名称试试');
+
+    const results=data.filter(x=>
+      ['city','administrative','town','municipality'].includes(x.type) ||
+      ['city','administrative','town','municipality'].includes(x.addresstype)
+    );
+    const place=results[0]||data[0];
+    $('newLat').value=Number(place.lat).toFixed(5);
+    $('newLng').value=Number(place.lon).toFixed(5);
+    map.setView([Number(place.lat),Number(place.lon)],10);
+    toast('已找到位置，请确认后添加');
+  }catch(e){
+    toast('定位失败：'+e.message);
+  }
+};{const name=$('newName').value.trim(),lat=Number($('newLat').value),lng=Number($('newLng').value);if(!name){toast('请填写城市名称');return}const c={id:crypto.randomUUID(),name,lat,lng,status:'考虑中',transport:null,hotel:null,other_cost:null,attractions:[],notes:'',votes:0};try{await rpc('add_travel_city',{p_city:c});await loadAll();selectedId=c.id;closeModal();showDetail(c.id);toast('城市已添加')}catch(e){toast('添加失败：'+e.message)}};
 map.on('click',e=>addAt(e.latlng.lat,e.latlng.lng));$('addBtn').onclick=()=>{const c=map.getCenter();addAt(c.lat,c.lng)};
 window.editCity=id=>{const c=cities.find(x=>x.id===id);if(!c)return;modal(`<h2>编辑城市档案</h2><div class="field"><label>城市名称</label><input id="eName" value="${esc(c.name)}"></div><div class="two"><div class="field"><label>人均交通费（元）</label><input id="eTransport" type="number" min="0" value="${c.transport??''}"></div><div class="field"><label>人均住宿费（元）</label><input id="eHotel" type="number" min="0" value="${c.hotel??''}"></div></div><div class="two"><div class="field"><label>其他人均预算（元）</label><input id="eOther" type="number" min="0" value="${c.other_cost??''}"></div><div class="field"><label>状态</label><select id="eStatus">${['考虑中','比较中','已选定','暂不考虑'].map(s=>`<option ${c.status===s?'selected':''}>${s}</option>`).join('')}</select></div></div><div class="field"><label>想去的景点（每行一个）</label><textarea id="eAttractions">${esc((c.attractions||[]).join('\n'))}</textarea></div><div class="field"><label>备注 / 交通方式 / 美食想法</label><textarea id="eNotes">${esc(c.notes||'')}</textarea></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="saveCity('${id}')">保存档案</button></div>`)}
 window.saveCity=async id=>{const v=x=>$(x).value,n=x=>v(x)===''?null:Number(v(x));const patch={name:v('eName').trim(),transport:n('eTransport'),hotel:n('eHotel'),other_cost:n('eOther'),status:v('eStatus'),attractions:v('eAttractions').split('\n').map(x=>x.trim()).filter(Boolean),notes:v('eNotes')};try{await rpc('update_travel_city',{p_id:id,p_patch:patch});closeModal();await loadAll();selectedId=id;if(cities.some(c=>c.id===id))showDetail(id);toast('档案已保存')}catch(e){toast('保存失败：'+e.message)}};
