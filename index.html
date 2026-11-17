@@ -81,6 +81,7 @@ let draftPlaceLat=null;
 let draftPlaceLng=null;
 let activePlaceCityId=null;
 let routeSelectedIds=new Set();
+let routeLine=null;
 let placeSearchData=[];
 const placeIcons={
   food:'🍜',
@@ -210,7 +211,11 @@ window.searchPlaceLocation=async()=>{
     const res=await fetch(url);
     if(!res.ok)throw Error('地图搜索暂时不可用');
 
-    const data=await res.json();
+    let data=await res.json();
+    if(!data.length&&query!==keyword){
+      const retry=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=zh-CN&q='+encodeURIComponent(keyword));
+      if(retry.ok)data=await retry.json();
+    }
     if(!data.length)throw Error('没有找到位置，请尝试填写更详细的地址');
 
     placeSearchData=data;
@@ -265,69 +270,164 @@ async function reversePlaceAddress(lat,lng){
   }
 }
 
-// 显示当前城市的路线选择清单
+// 显示当前城市的路线选择清单（按勾选顺序排列）
 function renderRouteChoices(cityId){
   const currentPlaces=places.filter(p=>p.city_id===cityId);
-
+  const validIds=new Set(currentPlaces.map(p=>p.id));
+  routeSelectedIds=new Set([...routeSelectedIds].filter(id=>validIds.has(id)));
+  const ordered=[...routeSelectedIds].map(id=>currentPlaces.find(p=>p.id===id)).filter(Boolean);
+  const rest=currentPlaces.filter(p=>!routeSelectedIds.has(p.id));
   $('routePlaces').innerHTML=currentPlaces.length
-    ?currentPlaces.map(p=>`
+    ?[...ordered,...rest].map(p=>`
       <label class="route-place">
-        <input type="checkbox"
-          ${routeSelectedIds.has(p.id)?'checked':''}
+        <input type="checkbox" ${routeSelectedIds.has(p.id)?'checked':''}
           onchange="toggleRoutePlace('${p.id}',this.checked)">
-        <span>${placeIcons[p.category]||'📌'} ${esc(p.name)}</span>
-      </label>
-    `).join('')
+        <span style="flex:1">${placeIcons[p.category]||'📌'} ${esc(p.name)}</span>
+        ${routeSelectedIds.has(p.id)?`<button class="secondary" style="padding:4px 8px" onclick="event.preventDefault();event.stopPropagation();moveRoutePlace('${p.id}',-1)" title="上移">↑</button><button class="secondary" style="padding:4px 8px" onclick="event.preventDefault();event.stopPropagation();moveRoutePlace('${p.id}',1)" title="下移">↓</button>`:''}
+      </label>`).join('')
     :'添加地点后，就能在这里选择行程。';
 }
-
-// 选择或取消路线地点
 window.toggleRoutePlace=(id,checked)=>{
-  if(checked){
-    routeSelectedIds.add(id);
-  }else{
-    routeSelectedIds.delete(id);
-  }
+  if(checked)routeSelectedIds.add(id);
+  else routeSelectedIds.delete(id);
+  renderRouteChoices(selectedId);
+};
+window.moveRoutePlace=(id,delta)=>{
+  const ids=[...routeSelectedIds],i=ids.indexOf(id),j=i+delta;
+  if(i<0||j<0||j>=ids.length)return;
+  [ids[i],ids[j]]=[ids[j],ids[i]];
+  routeSelectedIds=new Set(ids);
+  renderRouteChoices(selectedId);
 };
 
-// 生成地图导航链接
-$('routeBtn').onclick=()=>{
-  const selected=places.filter(p=>
-    p.city_id===selectedId&&routeSelectedIds.has(p.id)
-  );
+// 添加地点按钮
+$('addPlaceBtn').onclick=()=>{
+  window.openAddPlace();
+};
+// 网站内显示路线
+$('routeMode').onchange=()=>{if(routeLine&&cityMap){cityMap.removeLayer(routeLine);routeLine=null;}$('routeResult').textContent='';};
+$('routeBtn').onclick=async()=>{
+  const selected=[...routeSelectedIds]
+    .map(id=>places.find(p=>p.id===id&&p.city_id===selectedId))
+    .filter(Boolean);
 
   if(selected.length<2){
     toast('请至少选择两个地点');
     return;
   }
 
-  const origin=selected[0];
-  const destination=selected[selected.length-1];
-  const mode=$('routeMode').value;
-
-  const params=new URLSearchParams({
-    api:'1',
-    origin:`${origin.lat},${origin.lng}`,
-    destination:`${destination.lat},${destination.lng}`,
-    travelmode:mode==='transit'?'transit':'walking'
-  });
-
-  if(selected.length>2){
-    params.set(
-      'waypoints',
-      selected.slice(1,-1).map(p=>`${p.lat},${p.lng}`).join('|')
-    );
+  if(!cityMap){
+    toast('城市地图尚未加载');
+    return;
   }
 
-  const url='https://www.google.com/maps/dir/?'+params.toString();
+  const mode=$('routeMode').value;
 
-  $('routeResult').innerHTML=`
-    已选择 ${selected.length} 个地点，路线顺序按勾选顺序排列。
-    <br>
-    <a href=" " target="_blank" rel="noopener">
-      打开 Google 地图查看${mode==='transit'?'公共交通':'步行'}路线 →
-    </a >
-  `;
+  // 清除上一条路线
+  if(routeLine){
+    cityMap.removeLayer(routeLine);
+    routeLine=null;
+  }
+
+  const bounds=L.latLngBounds(
+    selected.map(p=>[Number(p.lat),Number(p.lng)])
+  );
+
+  // 公共交通：先显示地点顺序和示意连线
+  if(mode==='transit'){
+    routeLine=L.polyline(
+      selected.map(p=>[Number(p.lat),Number(p.lng)]),
+      {
+        color:'#b58b70',
+        weight:5,
+        opacity:0.85,
+        dashArray:'8 8'
+      }
+    ).addTo(cityMap);
+
+    cityMap.fitBounds(bounds,{padding:[35,35]});
+
+    $('routeResult').innerHTML=`
+      <b>公共交通行程示意</b>
+      <div style="margin-top:8px">
+        ${selected.map((p,i)=>`
+          <div style="margin:5px 0">
+            ${i+1}. ${esc(p.name)}
+          </div>
+        `).join('')}
+      </div>
+      <p style="color:#9a765e;font-size:12px;margin-top:10px">
+        虚线仅表示地点顺序，不代表实际公交或地铁线路。
+        当前版本尚未接入实时公交或地铁换乘数据，请勿将虚线当作实际交通线路。
+      </p >
+    `;
+    return;
+  }
+
+  // 步行：请求 OpenStreetMap 步行路线
+  try{
+    toast('正在计算步行路线…');
+
+    const coordinates=selected
+      .map(p=>`${Number(p.lng)},${Number(p.lat)}`)
+      .join(';');
+
+    const url=
+      'https://routing.openstreetmap.de/routed-foot/route/v1/driving/'
+      +coordinates
+      +'?overview=full&geometries=geojson&steps=true';
+
+    const res=await fetch(url);
+
+    if(!res.ok){
+      throw Error('步行路线服务暂时不可用');
+    }
+
+    const data=await res.json();
+
+    if(!data.routes||!data.routes.length){
+      throw Error('没有找到可用的步行路线');
+    }
+
+    routeLine=L.geoJSON(data.routes[0].geometry,{
+      style:{
+        color:'#789b83',
+        weight:5,
+        opacity:0.9
+      }
+    }).addTo(cityMap);
+
+    cityMap.fitBounds(routeLine.getBounds(),{
+      padding:[35,35]
+    });
+
+    const distance=(data.routes[0].distance/1000).toFixed(2);
+    const duration=Math.round(data.routes[0].duration/60);
+
+    $('routeResult').innerHTML=`
+      <b>步行路线已生成</b>
+      <div style="margin-top:8px">
+        ${selected.map((p,i)=>`
+          <div style="margin:5px 0">
+            ${i+1}. ${esc(p.name)}
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:10px">
+        路线距离：约 ${distance} 公里
+        <br>
+        预计步行时间：约 ${duration} 分钟
+      </div>
+    `;
+
+    toast('步行路线已显示在地图上');
+
+  }catch(e){
+    $('routeResult').textContent=
+      '路线生成失败：'+e.message+'。请检查网络或稍后重试。';
+
+    toast('步行路线生成失败');
+  }
 };
 // 添加地点表单
 window.openAddPlace=(lat,lng)=>{
@@ -380,16 +480,21 @@ window.openAddPlace=(lat,lng)=>{
 
     <div class="modal-actions">
       <button class="ghost" onclick="closeModal()">取消</button>
-      <button onclick="createPlace(${lat},${lng})">保存地点</button>
+      <button onclick="createPlace()">保存地点</button>
     </div>
   `);
 
-  draftPlaceLat=lat;
-  draftPlaceLng=lng;
+  draftPlaceLat=Number.isFinite(Number(lat))&&lat!=null?Number(lat):null;
+  draftPlaceLng=Number.isFinite(Number(lng))&&lng!=null?Number(lng):null;
+  if(draftPlaceLat!==null&&draftPlaceLng!==null){
+    reversePlaceAddress(draftPlaceLat,draftPlaceLng).then(address=>{
+      if($('placeAddress')&&!$('placeAddress').value)$('placeAddress').value=address;
+    });
+  }
 };
 
 // 保存新地点
-window.createPlace=async(lat,lng)=>{
+window.createPlace=async()=>{
   const name=$('placeName').value.trim();
   const priceText=$('placePrice').value.trim();
 
@@ -403,6 +508,11 @@ window.createPlace=async(lat,lng)=>{
     return;
   }
 
+  if(draftPlaceLat===null||draftPlaceLng===null||!Number.isFinite(draftPlaceLat)||!Number.isFinite(draftPlaceLng)){
+    toast('请先点击「搜索位置」并选择结果，或在地图上选点');
+    return;
+  }
+
   const p={
     id:crypto.randomUUID(),
     city_id:selectedId,
@@ -412,8 +522,8 @@ window.createPlace=async(lat,lng)=>{
     price:priceText===''?null:Number(priceText),
     notes:$('placeNotes').value.trim(),
     address:$('placeAddress').value.trim(),
-    lat:draftPlaceLat??lat,
-    lng:draftPlaceLng??lng
+    lat:draftPlaceLat,
+    lng:draftPlaceLng
   };
 
   try{
@@ -521,6 +631,7 @@ window.savePlace=async id=>{
 // 删除地点
 window.deletePlace=async id=>{
   if(!confirm('确定删除这个地点吗？'))return;
+  routeSelectedIds.delete(id);
 
   try{
     await rpc('delete_travel_place',{p_id:id});
@@ -539,6 +650,9 @@ async function showCityMap(city){
 
   if(activePlaceCityId!==city.id){
     activePlaceCityId=city.id;
+    routeSelectedIds.clear();
+    if(routeLine){cityMap.removeLayer(routeLine);routeLine=null;}
+    $('routeResult').textContent='';
     cityMap.setView([Number(city.lat),Number(city.lng)],13);
   }
 
@@ -546,7 +660,7 @@ async function showCityMap(city){
   await loadPlaces(city.id);
 }
 async function rpc(name,args={}){if(!db||!roomCode)throw Error('请先配置数据库并加入房间');const {data,error}=await db.rpc(name,{p_room_code:code(),...args});if(error)throw error;return data}
-function openRoomDialog(){modal(`<h2>创建或加入旅行房间</h2><p>房间密钥就是你们共同使用的邀请口令。首次输入会创建房间；朋友输入完全相同的密钥即可加入。建议使用至少 20 位随机字符，避免使用生日、手机号等个人信息。请只发给同行朋友。</p><div class="field"><label>旅行房间密钥</label><input id="roomInput" value="${esc(roomCode)}" placeholder="例如：北方旅行-随机字符-8f3k9x2p"></div><div class="field"><label>你的昵称</label><input id="nickInput" value="${esc(localStorage.getItem('travel_nick')||'')}" placeholder="例如：小四"></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="joinRoom()">进入房间</button></div>`)}
+function openRoomDialog(){modal(`<h2>创建或加入旅行房间</h2><p>房间密钥就是你们共同使用的邀请口令。首次输入会创建房间；朋友输入完全相同的密钥即可加入。建议使用至少 12 位不易猜测的字符，避免使用生日、手机号等个人信息。请只发给同行朋友。</p><div class="field"><label>旅行房间密钥</label><input id="roomInput" value="${esc(roomCode)}" placeholder="例如：北方旅行-随机字符-8f3k9x2p"></div><div class="field"><label>你的昵称</label><input id="nickInput" value="${esc(localStorage.getItem('travel_nick')||'')}" placeholder="例如：小四"></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="joinRoom()">进入房间</button></div>`)}
 window.joinRoom=async()=>{const c=$('roomInput').value.trim(),nick=$('nickInput').value.trim();if(c.length<12){toast('房间密钥至少填写 12 个字符');return}roomCode=c;localStorage.setItem('travel_room',c);if(nick)localStorage.setItem('travel_nick',nick);closeModal();$('roomBadge').textContent='房间：'+c.slice(0,5)+'…';if(!clientReady()){toast('先完成数据库配置，才能加入在线房间');$('syncStatus').textContent='等待数据库配置';return}try{await rpc('join_travel_room');await loadAll();if(poller)clearInterval(poller);poller=setInterval(loadAll,5000);$('syncStatus').textContent='在线同步中（约 5 秒刷新）';toast('已进入旅行房间')}catch(e){toast('加入失败：'+e.message);$('syncStatus').textContent='连接失败'}};
 $('roomBtn').onclick=openRoomDialog;
 $('inviteBtn').onclick=async()=>{
