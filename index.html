@@ -24,7 +24,7 @@ main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-column
 .route-actions select{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fffefa;color:var(--ink)}
 .route-result{font-size:12px;line-height:1.8;margin-top:10px;color:var(--muted)}
 .route-result a{color:#557b60;font-weight:700}
-.wish-tabs{display:flex;gap:8px;margin-bottom:12px}.wish-tabs button{flex:1}.wish-list{display:flex;flex-direction:column;gap:8px}.wish-row{display:flex;align-items:flex-start;gap:8px;background:#f8f6ef;padding:10px;border-radius:12px}.wish-row input{margin-top:5px;accent-color:var(--green)}.wish-info{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px}.wish-done{text-decoration:line-through;color:var(--muted)}.wish-meta{font-size:11px;color:var(--muted);margin-top:4px}.wish-actions{display:flex;gap:4px}.wish-actions button{padding:5px 8px;font-size:11px}.wish-form{margin-top:12px}.wish-form button{width:100%}
+.wish-tabs{display:flex;gap:8px;margin-bottom:12px}.wish-tabs button{flex:1}.wish-list{display:flex;flex-direction:column;gap:8px}.wish-row{display:flex;align-items:flex-start;gap:8px;background:#f8f6ef;padding:10px;border-radius:12px}.wish-row input{margin-top:5px;accent-color:var(--green)}.wish-info{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px}.wish-done{text-decoration:line-through;color:var(--muted)}.wish-meta{font-size:11px;color:var(--muted);margin-top:4px}.wish-jump{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:0;font-size:13px;font-weight:650;cursor:pointer}.wish-jump:hover{text-decoration:underline}.wish-jump:focus-visible{outline:2px solid var(--green);outline-offset:3px}.wish-actions{display:flex;gap:4px}.wish-actions button{padding:5px 8px;font-size:11px}.wish-form{margin-top:12px}.wish-form button{width:100%}
 @media(max-width:900px){#cityMap{height:52vh;min-height:340px}}.side{display:flex;flex-direction:column;gap:14px}.card{padding:17px}.card h2{font-size:17px;margin:0 0 12px}.empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;background:#f8f6ef;border-radius:14px}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:12px;color:var(--muted);font-weight:650}.field input,.field textarea,.field select{border:1px solid var(--line);border-radius:11px;background:#fffefa;padding:10px 11px;color:var(--ink);outline:none;width:100%}.field textarea{min-height:74px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.city-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.city-title h2{font-size:21px;margin:0}.pill{font-size:11px;padding:5px 9px;border-radius:99px;background:var(--yellow);color:#76643c}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.stat{background:#f5f4eb;padding:11px;border-radius:13px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:19px;display:block;margin-top:4px}.subhead{font-size:12px;color:var(--muted);font-weight:700;margin:16px 0 7px}.list{padding-left:19px;margin:0;font-size:13px;line-height:1.8}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.city-list{display:flex;flex-direction:column;gap:7px;max-height:210px;overflow:auto}.city-item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;text-align:left;background:#fffefa;color:var(--ink)}.city-item.active{border-color:var(--green);background:#f2f6ef}.city-item small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.vote{background:#f8f4e8;color:#7a6738;border-radius:99px;padding:5px 8px;font-size:11px;white-space:nowrap}.comments{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}.comment{background:#f8f6ef;border-radius:12px;padding:9px 11px;font-size:12px}.comment b{display:block;margin-bottom:3px}.muted{color:var(--muted)}.footnote{font-size:11px;line-height:1.6;color:var(--muted);padding:0 18px 16px}.modal-back{position:fixed;inset:0;background:#26342f66;display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}.modal{background:var(--paper);border-radius:20px;padding:20px;width:min(520px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px;font-size:18px}.modal p{font-size:13px;color:var(--muted);line-height:1.6}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#34443b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;display:none;z-index:2000}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:12px}#map{height:52vh;min-height:340px}header{padding:13px 15px}}
 </style></head><body>
@@ -142,6 +142,7 @@ async function loadPlaces(cityId){
     const d=await rpc('get_travel_data');
     places=d.places||[];
     drawPlaces(cityId);
+    renderWishList();
   }catch(e){
     console.error('地点读取失败',e);
   }
@@ -157,7 +158,8 @@ async function loadPlaces(cityId){
   currentPlaces.forEach(p=>{
     const icon=placeIcons[p.category]||'📌';
     const marker=L.marker([p.lat,p.lng],{
-      draggable:true,
+      draggable:false,
+      placeId:p.id,
       icon:L.divIcon({
         html:`<div class="place-pin">${icon}</div>`,
         className:'',
@@ -183,28 +185,11 @@ async function loadPlaces(cityId){
       </div>
     `);
 
-    marker.on('dragend',async e=>{
-      const pos=e.target.getLatLng();
-      try{
-        const address=await reversePlaceAddress(pos.lat,pos.lng);
-        await rpc('update_travel_place',{
-          p_id:p.id,
-          p_patch:{
-            lat:pos.lat,
-            lng:pos.lng,
-            address:address||p.address||''
-          }
-        });
-        await loadPlaces(cityId);
-        toast('地点位置已更新');
-      }catch(err){
-        toast('位置更新失败：'+err.message);
-        await loadPlaces(cityId);
-      }
-    });
+    // 地点标记固定，避免误拖动；坐标只能通过编辑地点修改。
+  
   });
 
-  $('placeHint').textContent=`当前城市共有 ${currentPlaces.length} 个地点标记 · 可以拖动图标调整位置`;
+  $('placeHint').textContent=`当前城市共有 ${currentPlaces.length} 个地点标记 · 点击图标查看信息，修改位置请使用「编辑」`;
 
   renderRouteChoices(cityId);
   refreshWishPlaces();
@@ -739,10 +724,43 @@ function renderWishList(){
     const place=places.find(p=>p.id===x.place_id);
     const loc=place?.name||x.shop_name||'';
     const price=x.price===null||x.price===undefined?'':' · 预计 ¥'+Number(x.price).toLocaleString('zh-CN');
-    return `<div class="wish-row"><input type="checkbox" ${x.done?'checked':''} onchange="toggleWishItem('${x.id}',this.checked)" aria-label="完成 ${esc(x.name)}"><div class="wish-info"><div class="${x.done?'wish-done':''}">${esc(x.name)}</div>${loc||price?`<div class="wish-meta">${loc?'📍 '+esc(loc):''}${price}</div>`:''}${x.notes?`<div class="wish-meta">${esc(x.notes)}</div>`:''}</div><div class="wish-actions"><button class="secondary" onclick="editWishItem('${x.id}')">编辑</button><button class="danger" onclick="deleteWishItem('${x.id}')">删除</button></div></div>`;
+    const canJump=x.kind==='shopping'&&!!x.place_id;
+    const itemTitle=canJump?`<button type="button" class="wish-jump ${x.done?'wish-done':''}" onclick="jumpToWishPlace('${x.id}')" title="查看关联店铺">${esc(x.name)} <span style="font-size:11px;color:#557b60">⌖ 查看店铺</span></button>`:`<div class="${x.done?'wish-done':''}">${esc(x.name)}</div>`;
+    return `<div class="wish-row"><input type="checkbox" ${x.done?'checked':''} onchange="toggleWishItem('${x.id}',this.checked)" aria-label="完成 ${esc(x.name)}"><div class="wish-info">${itemTitle}${loc||price?`<div class="wish-meta">${loc?'📍 '+esc(loc):''}${price}</div>`:''}${x.notes?`<div class="wish-meta">${esc(x.notes)}</div>`:''}</div><div class="wish-actions"><button class="secondary" onclick="editWishItem('${x.id}')">编辑</button><button class="danger" onclick="deleteWishItem('${x.id}')">删除</button></div></div>`;
   }).join('');
   refreshWishPlaces();
 }
+// 点击购物清单，定位到对应城市地图的关联店铺。
+window.jumpToWishPlace=async id=>{
+  const wish=wishItems.find(x=>x.id===id);
+  if(!wish||!wish.place_id)return;
+  let place=places.find(p=>p.id===wish.place_id);
+  // 即使当前尚未打开城市地图，也可以从房间云端获取全部地点。
+  if(!place){
+    try{
+      const data=await rpc('get_travel_data');
+      places=data.places||[];
+      place=places.find(p=>p.id===wish.place_id);
+    }catch(e){toast('暂时无法读取关联店铺');return;}
+  }
+  if(!place){toast('关联店铺已不存在，无法定位');return;}
+  const lat=Number(place.lat),lng=Number(place.lng);
+  if(place.lat===null||place.lng===null||place.lat===''||place.lng===''||!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180){
+    toast('这家店还没有有效坐标，暂时无法跳转');return;
+  }
+  const city=cities.find(c=>c.id===place.city_id);
+  if(!city){toast('找不到关联店铺所在的城市');return;}
+  if(selectedId!==city.id){
+    showDetail(city.id);
+    await showCityMap(city);
+  }else await showCityMap(city);
+  // 等城市地图的标记加载完成后定位并打开对应店铺的信息。
+  if(selectedId!==city.id)return;
+  cityMap.setView([lat,lng],17);
+  const marker=cityMapLayer.getLayers().find(m=>m instanceof L.Marker&&m.options.placeId===place.id);
+  if(marker)marker.openPopup();
+  $('cityMap').scrollIntoView({behavior:'smooth',block:'center'});
+};
 async function reloadWishItems(){
   if(!roomCode||!db)return;
   try{
