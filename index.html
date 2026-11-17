@@ -8,11 +8,34 @@
 :root{--cream:#fbf8f0;--paper:#fffdf8;--ink:#34443b;--muted:#7d897f;--green:#829b86;--green2:#e8efe6;--yellow:#f3e6bd;--line:#e9e5da;--shadow:0 8px 28px #46544812}
 *{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--green);color:white;font-weight:650}button.secondary{background:var(--green2);color:var(--ink)}button.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}button.danger{background:#f6e7e2;color:#925d4e}
 header{padding:17px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fffdf8eF;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:500}.brand{display:flex;align-items:center;gap:11px}.logo{width:40px;height:40px;border-radius:14px;background:var(--green2);display:grid;place-items:center;font-size:22px}.brand h1{font-size:19px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.room{font-size:12px;color:var(--muted);background:var(--green2);padding:9px 11px;border-radius:999px}
-main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.85fr);gap:16px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}.map-head{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px}.map-head h2,.section-title{font-size:16px;margin:0}.hint{font-size:12px;color:var(--muted);margin-top:4px}#map{height:calc(100vh - 220px);min-height:480px;background:#e9eee6}.map-foot{padding:10px 16px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.side{display:flex;flex-direction:column;gap:14px}.card{padding:17px}.card h2{font-size:17px;margin:0 0 12px}.empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;background:#f8f6ef;border-radius:14px}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:12px;color:var(--muted);font-weight:650}.field input,.field textarea,.field select{border:1px solid var(--line);border-radius:11px;background:#fffefa;padding:10px 11px;color:var(--ink);outline:none;width:100%}.field textarea{min-height:74px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.city-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.city-title h2{font-size:21px;margin:0}.pill{font-size:11px;padding:5px 9px;border-radius:99px;background:var(--yellow);color:#76643c}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.stat{background:#f5f4eb;padding:11px;border-radius:13px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:19px;display:block;margin-top:4px}.subhead{font-size:12px;color:var(--muted);font-weight:700;margin:16px 0 7px}.list{padding-left:19px;margin:0;font-size:13px;line-height:1.8}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.city-list{display:flex;flex-direction:column;gap:7px;max-height:210px;overflow:auto}.city-item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;text-align:left;background:#fffefa;color:var(--ink)}.city-item.active{border-color:var(--green);background:#f2f6ef}.city-item small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.vote{background:#f8f4e8;color:#7a6738;border-radius:99px;padding:5px 8px;font-size:11px;white-space:nowrap}.comments{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}.comment{background:#f8f6ef;border-radius:12px;padding:9px 11px;font-size:12px}.comment b{display:block;margin-bottom:3px}.muted{color:var(--muted)}.footnote{font-size:11px;line-height:1.6;color:var(--muted);padding:0 18px 16px}.modal-back{position:fixed;inset:0;background:#26342f66;display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}.modal{background:var(--paper);border-radius:20px;padding:20px;width:min(520px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px;font-size:18px}.modal p{font-size:13px;color:var(--muted);line-height:1.6}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#34443b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;display:none;z-index:2000}
+main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.85fr);gap:16px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}.map-head{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px}.map-head h2,.section-title{font-size:16px;margin:0}.hint{font-size:12px;color:var(--muted);margin-top:4px}#map{height:calc(100vh - 220px);min-height:480px;background:#e9eee6}.map-foot{padding:10px 16px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.map-column{display:flex;flex-direction:column;gap:16px;min-width:0}
+.city-map-head{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.city-map-head h2{font-size:16px;margin:0}
+#cityMap{height:430px;min-height:350px;background:#e9eee6;z-index:1}
+.city-map-tools{display:flex;gap:7px;flex-wrap:wrap}
+.place-pin{font-size:27px;line-height:32px;text-align:center;filter:drop-shadow(0 2px 2px #0003)}
+.place-empty{padding:10px 16px;color:var(--muted);font-size:12px}
+@media(max-width:900px){#cityMap{height:52vh;min-height:340px}}.side{display:flex;flex-direction:column;gap:14px}.card{padding:17px}.card h2{font-size:17px;margin:0 0 12px}.empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;background:#f8f6ef;border-radius:14px}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:12px;color:var(--muted);font-weight:650}.field input,.field textarea,.field select{border:1px solid var(--line);border-radius:11px;background:#fffefa;padding:10px 11px;color:var(--ink);outline:none;width:100%}.field textarea{min-height:74px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.city-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.city-title h2{font-size:21px;margin:0}.pill{font-size:11px;padding:5px 9px;border-radius:99px;background:var(--yellow);color:#76643c}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.stat{background:#f5f4eb;padding:11px;border-radius:13px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:19px;display:block;margin-top:4px}.subhead{font-size:12px;color:var(--muted);font-weight:700;margin:16px 0 7px}.list{padding-left:19px;margin:0;font-size:13px;line-height:1.8}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.city-list{display:flex;flex-direction:column;gap:7px;max-height:210px;overflow:auto}.city-item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;text-align:left;background:#fffefa;color:var(--ink)}.city-item.active{border-color:var(--green);background:#f2f6ef}.city-item small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.vote{background:#f8f4e8;color:#7a6738;border-radius:99px;padding:5px 8px;font-size:11px;white-space:nowrap}.comments{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}.comment{background:#f8f6ef;border-radius:12px;padding:9px 11px;font-size:12px}.comment b{display:block;margin-bottom:3px}.muted{color:var(--muted)}.footnote{font-size:11px;line-height:1.6;color:var(--muted);padding:0 18px 16px}.modal-back{position:fixed;inset:0;background:#26342f66;display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}.modal{background:var(--paper);border-radius:20px;padding:20px;width:min(520px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px;font-size:18px}.modal p{font-size:13px;color:var(--muted);line-height:1.6}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#34443b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;display:none;z-index:2000}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:12px}#map{height:52vh;min-height:340px}header{padding:13px 15px}}
 </style></head><body>
 <header><div class="brand"><div class="logo">🧭</div><div><h1>一起去哪儿</h1><p>把想去的地方放上地图，一起商量下一站</p></div></div><div class="top-actions"><span class="room" id="roomBadge">尚未加入房间</span><button class="secondary" id="inviteBtn">邀请朋友</button><button id="roomBtn">加入 / 创建旅行房间</button></div></header>
-<main><section class="panel"><div class="map-head"><div><h2>我们的候选地图</h2><div class="hint">点击地图位置添加候选城市</div></div><button class="secondary" id="addBtn">＋ 添加城市</button></div><div id="map"></div><div class="map-foot"><span>✦ 奶油色地图 · 点击标记查看城市档案</span><span id="syncStatus">本地预览</span></div></section>
+<main><div class="map-column"><section class="panel"><div class="map-head"><div><h2>我们的候选地图</h2><div class="hint">点击地图位置添加候选城市</div></div><button class="secondary" id="addBtn">＋ 添加城市</button></div><div id="map"></div><div class="map-foot"><span>✦ 奶油色地图 · 点击标记查看城市档案</span><span id="syncStatus">本地预览</span></div></section>
+
+<section class="panel">
+  <div class="city-map-head">
+    <div>
+      <h2 id="cityMapTitle">📍 城市探索地图</h2>
+      <div class="hint" id="cityMapHint">先选择一个城市，这里就会显示它的专属地图</div>
+    </div>
+    <div class="city-map-tools">
+      <button class="secondary" id="addPlaceBtn">＋ 添加地点</button>
+    </div>
+  </div>
+  <div id="cityMap"></div>
+  <div class="place-empty" id="placeHint">选择城市后，可以在地图上标记美食、景点、住宿和购物地点。</div>
+</section>
+</div>
+
 <aside class="side"><section class="panel card"><h2 class="section-title">城市候选清单 <span class="muted" id="cityCount">0 个</span></h2><div class="city-list" id="cityList"><div class="empty">地图上还没有城市。</div></div></section>
 <section class="panel card" id="detailPanel"><div class="empty">选择地图上的一个城市，这里就会显示旅行档案。</div></section>
 <section class="panel card"><h2>大家的讨论</h2><div class="comments" id="comments"><div class="empty">还没有留言。</div></div><div class="field"><label>你的名字</label><input id="commentName" placeholder="例如：小四"></div><div class="field"><label>留言</label><textarea id="commentText" placeholder="我觉得……"></textarea></div><button id="sendComment">发送留言</button></section>
@@ -25,6 +48,37 @@ const SUPABASE_URL="https://rxrpsxlumjjfgzvstueh.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_lKL-iHeFMfcVCJ5rknTauQ_Kbqt4SQ5";
 let db=null,roomCode=localStorage.getItem("travel_room")||"",selectedId=null,cities=[],comments=[],poller=null;
 const $=id=>document.getElementById(id),map=L.map('map').setView([35.8,105.5],4),pins={};
+// 城市专属地图
+let cityMap=null;
+let cityMapLayer=null;
+let places=[];
+let activePlaceCityId=null;
+
+const placeIcons={
+  food:'🍜',
+  attraction:'🏛️',
+  hotel:'🏨',
+  shopping:'🛍️',
+  other:'📌'
+};
+
+function initCityMap(){
+  if(cityMap)return;
+  cityMap=L.map('cityMap').setView([35.8,105.5],5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19,
+    attribution:'&copy; OpenStreetMap'
+  }).addTo(cityMap);
+  cityMapLayer=L.layerGroup().addTo(cityMap);
+
+  cityMap.on('click',e=>{
+    if(!selectedId){
+      toast('请先选择一个城市');
+      return;
+    }
+    openAddPlace(e.latlng.lat,e.latlng.lng);
+  });
+}
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(map);
 const money=n=>n===null||n===undefined||n===""?"未填写":"¥"+Number(n).toLocaleString("zh-CN");
 function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2400)}
@@ -33,6 +87,256 @@ function modal(content){$('modal').innerHTML=content;$('modalBack').style.displa
 $('modalBack').addEventListener('click',e=>{if(e.target===$('modalBack'))closeModal()});
 function clientReady(){if(db)return true;if(SUPABASE_URL.startsWith('http')&&!SUPABASE_ANON_KEY.startsWith('在这里')){db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);return true}return false}
 function code(){return roomCode}
+// 读取当前城市的地点
+async function loadPlaces(cityId){
+  if(!cityId||!roomCode)return;
+  try{
+    const d=await rpc('get_travel_data');
+    places=d.places||[];
+    drawPlaces(cityId);
+  }catch(e){
+    console.error('地点读取失败',e);
+  }
+}
+
+// 在城市地图上绘制标记
+function drawPlaces(cityId){
+  if(!cityMapLayer)return;
+  cityMapLayer.clearLayers();
+
+  places.filter(p=>p.city_id===cityId).forEach(p=>{
+    const icon=placeIcons[p.category]||'📌';
+    const marker=L.marker([p.lat,p.lng],{
+      icon:L.divIcon({
+        html:`<div class="place-pin">${icon}</div>`,
+        className:'',
+        iconSize:[34,34],
+        iconAnchor:[17,17]
+      })
+    }).addTo(cityMapLayer);
+
+    const price=p.price===null||p.price===undefined
+      ?'未填写':'¥'+Number(p.price).toLocaleString('zh-CN');
+
+    marker.bindPopup(`
+      <div style="min-width:170px">
+        <b>${esc(p.name)}</b>
+        <div style="margin-top:5px">${esc(p.item||'暂无介绍')}</div>
+        <div style="margin-top:5px">价格：${price}</div>
+        <div style="margin-top:5px;color:#7d897f">${esc(p.notes||'')}</div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button onclick="editPlace('${p.id}')">编辑</button>
+          <button onclick="deletePlace('${p.id}')" style="background:#f6e7e2;color:#925d4e">删除</button>
+        </div>
+      </div>
+    `);
+  });
+
+  const count=places.filter(p=>p.city_id===cityId).length;
+  $('placeHint').textContent=`当前城市共有 ${count} 个地点标记 · 点击地图空白位置即可添加`;
+}
+
+// 添加地点表单
+window.openAddPlace=(lat,lng)=>{
+  if(!selectedId){
+    toast('请先选择一个城市');
+    return;
+  }
+
+  modal(`
+    <h2>📍 添加地点</h2>
+    <p>记录旅行中想去的店铺、景点和其他位置。</p >
+
+    <div class="field">
+      <label>地点类型</label>
+      <select id="placeCategory">
+        <option value="food">🍜 美食</option>
+        <option value="attraction">🏛️ 景点</option>
+        <option value="hotel">🏨 住宿</option>
+        <option value="shopping">🛍️ 购物</option>
+        <option value="other">📌 其他</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>地点名称</label>
+      <input id="placeName" placeholder="例如：老厨家">
+    </div>
+
+    <div class="field">
+      <label>主要内容 / 介绍</label>
+      <input id="placeItem" placeholder="例如：锅包肉、东北菜">
+    </div>
+
+    <div class="field">
+      <label>价格（元，可不填）</label>
+      <input id="placePrice" type="number" min="0" placeholder="例如：70">
+    </div>
+
+    <div class="field">
+      <label>备注</label>
+      <textarea id="placeNotes" placeholder="例如：想尝尝正宗锅包肉"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="ghost" onclick="closeModal()">取消</button>
+      <button onclick="createPlace(${lat},${lng})">保存地点</button>
+    </div>
+  `);
+};
+
+// 保存新地点
+window.createPlace=async(lat,lng)=>{
+  const name=$('placeName').value.trim();
+  const priceText=$('placePrice').value.trim();
+
+  if(!name){
+    toast('请填写地点名称');
+    return;
+  }
+
+  if(priceText!==''&&(!Number.isFinite(Number(priceText))||Number(priceText)<0)){
+    toast('请填写正确的价格');
+    return;
+  }
+
+  const p={
+    id:crypto.randomUUID(),
+    city_id:selectedId,
+    name,
+    category:$('placeCategory').value,
+    item:$('placeItem').value.trim(),
+    price:priceText===''?null:Number(priceText),
+    notes:$('placeNotes').value.trim(),
+    lat,
+    lng
+  };
+
+  try{
+    await rpc('add_travel_place',{p_place:p});
+    closeModal();
+    await loadPlaces(selectedId);
+    toast('地点已保存，同行朋友也能看到了！');
+  }catch(e){
+    toast('保存失败：'+e.message);
+  }
+};
+
+// 编辑地点
+window.editPlace=id=>{
+  const p=places.find(x=>x.id===id);
+  if(!p)return;
+
+  modal(`
+    <h2>编辑地点</h2>
+
+    <div class="field">
+      <label>地点类型</label>
+      <select id="placeCategory">
+        <option value="food" ${p.category==='food'?'selected':''}>🍜 美食</option>
+        <option value="attraction" ${p.category==='attraction'?'selected':''}>🏛️ 景点</option>
+        <option value="hotel" ${p.category==='hotel'?'selected':''}>🏨 住宿</option>
+        <option value="shopping" ${p.category==='shopping'?'selected':''}>🛍️ 购物</option>
+        <option value="other" ${p.category==='other'?'selected':''}>📌 其他</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>地点名称</label>
+      <input id="placeName" value="${esc(p.name)}">
+    </div>
+
+    <div class="field">
+      <label>主要内容 / 介绍</label>
+      <input id="placeItem" value="${esc(p.item||'')}">
+    </div>
+
+    <div class="field">
+      <label>价格（元）</label>
+      <input id="placePrice" type="number" min="0" value="${p.price??''}">
+    </div>
+
+    <div class="field">
+      <label>备注</label>
+      <textarea id="placeNotes">${esc(p.notes||'')}</textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="ghost" onclick="closeModal()">取消</button>
+      <button onclick="savePlace('${id}')">保存修改</button>
+    </div>
+  `);
+};
+
+// 保存地点修改
+window.savePlace=async id=>{
+  const name=$('placeName').value.trim();
+  const priceText=$('placePrice').value.trim();
+
+  if(!name){
+    toast('请填写地点名称');
+    return;
+  }
+
+  if(priceText!==''&&(!Number.isFinite(Number(priceText))||Number(priceText)<0)){
+    toast('请填写正确的价格');
+    return;
+  }
+
+  const patch={
+    name,
+    category:$('placeCategory').value,
+    item:$('placeItem').value.trim(),
+    price:priceText===''?null:Number(priceText),
+    notes:$('placeNotes').value.trim()
+  };
+
+  try{
+    await rpc('update_travel_place',{p_id:id,p_patch:patch});
+    closeModal();
+    await loadPlaces(selectedId);
+    toast('地点资料已更新');
+  }catch(e){
+    toast('修改失败：'+e.message);
+  }
+};
+
+// 删除地点
+window.deletePlace=async id=>{
+  if(!confirm('确定删除这个地点吗？'))return;
+
+  try{
+    await rpc('delete_travel_place',{p_id:id});
+    await loadPlaces(selectedId);
+    toast('地点已删除');
+  }catch(e){
+    toast('删除失败：'+e.message);
+  }
+};
+
+// 点击添加地点按钮，在当前地图中心放置标记
+$('addPlaceBtn').onclick=()=>{
+  if(!selectedId||!cityMap){
+    toast('请先选择一个城市');
+    return;
+  }
+  const center=cityMap.getCenter();
+  openAddPlace(center.lat,center.lng);
+};// 切换城市地图
+async function showCityMap(city){
+  initCityMap();
+
+  $('cityMapTitle').textContent='📍 '+city.name+' · 城市探索地图';
+  $('cityMapHint').textContent='在地图上标记想去的美食、景点、住宿和购物地点';
+
+  if(activePlaceCityId!==city.id){
+    activePlaceCityId=city.id;
+    cityMap.setView([Number(city.lat),Number(city.lng)],13);
+  }
+
+  setTimeout(()=>cityMap.invalidateSize(),100);
+  await loadPlaces(city.id);
+}
 async function rpc(name,args={}){if(!db||!roomCode)throw Error('请先配置数据库并加入房间');const {data,error}=await db.rpc(name,{p_room_code:code(),...args});if(error)throw error;return data}
 function openRoomDialog(){modal(`<h2>创建或加入旅行房间</h2><p>房间密钥就是你们共同使用的邀请口令。首次输入会创建房间；朋友输入完全相同的密钥即可加入。建议使用至少 20 位随机字符，避免使用生日、手机号等个人信息。请只发给同行朋友。</p><div class="field"><label>旅行房间密钥</label><input id="roomInput" value="${esc(roomCode)}" placeholder="例如：北方旅行-随机字符-8f3k9x2p"></div><div class="field"><label>你的昵称</label><input id="nickInput" value="${esc(localStorage.getItem('travel_nick')||'')}" placeholder="例如：小四"></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="joinRoom()">进入房间</button></div>`)}
 window.joinRoom=async()=>{const c=$('roomInput').value.trim(),nick=$('nickInput').value.trim();if(c.length<12){toast('房间密钥至少填写 12 个字符');return}roomCode=c;localStorage.setItem('travel_room',c);if(nick)localStorage.setItem('travel_nick',nick);closeModal();$('roomBadge').textContent='房间：'+c.slice(0,5)+'…';if(!clientReady()){toast('先完成数据库配置，才能加入在线房间');$('syncStatus').textContent='等待数据库配置';return}try{await rpc('join_travel_room');await loadAll();if(poller)clearInterval(poller);poller=setInterval(loadAll,5000);$('syncStatus').textContent='在线同步中（约 5 秒刷新）';toast('已进入旅行房间')}catch(e){toast('加入失败：'+e.message);$('syncStatus').textContent='连接失败'}};
@@ -73,7 +377,7 @@ $('inviteBtn').onclick=async()=>{
 };
 async function loadAll(){try{const d=await rpc('get_travel_data');cities=d.cities||[];comments=d.comments||[];render();renderComments();$('syncStatus').textContent='在线同步中（约 5 秒刷新）'}catch(e){$('syncStatus').textContent='同步异常：'+e.message;throw e}}
 function render(){Object.values(pins).forEach(p=>map.removeLayer(p));Object.keys(pins).forEach(k=>delete pins[k]);cities.forEach(c=>{const m=L.marker([c.lat,c.lng]).addTo(map).bindTooltip(esc(c.name));m.on('click',()=>showDetail(c.id));pins[c.id]=m});$('cityCount').textContent=cities.length+' 个';$('cityList').innerHTML=cities.length?cities.map(c=>`<button class="city-item ${c.id===selectedId?'active':''}" onclick="showDetail('${c.id}')"><span><b>${esc(c.name)}</b><small>${esc(c.status||'考虑中')} · 交通 ${money(c.transport)}</small></span><span class="vote">♥ ${c.votes||0}</span></button>`).join(''):'<div class="empty">地图上还没有城市。先把心动目的地标出来吧。</div>';renderBudget();if(selectedId&&cities.some(c=>c.id===selectedId))showDetail(selectedId);else if(!selectedId)$('detailPanel').innerHTML='<div class="empty">选择地图上的一个城市，这里就会显示旅行档案。</div>'}
-function showDetail(id){selectedId=id;const c=cities.find(x=>x.id===id);if(!c)return;const total=[c.transport,c.hotel,c.other_cost].every(x=>x!==null&&x!==undefined&&x!=='')?[c.transport,c.hotel,c.other_cost].reduce((a,b)=>a+Number(b),0):null;$('detailPanel').innerHTML=`<div class="city-title"><h2>${esc(c.name)}</h2><span class="pill">${esc(c.status||'考虑中')}</span></div><div class="stats"><div class="stat"><small>人均交通费</small><strong>${money(c.transport)}</strong></div><div class="stat"><small>人均住宿预算</small><strong>${money(c.hotel)}</strong></div><div class="stat"><small>其他预算</small><strong>${money(c.other_cost)}</strong></div><div class="stat"><small>预计人均合计</small><strong>${money(total)}</strong></div></div><div class="subhead">想去的景点</div><ul class="list">${(c.attractions||[]).length?c.attractions.map(x=>'<li>'+esc(x)+'</li>').join(''):'<li class="muted">还没添加景点</li>'}</ul><div class="subhead">交通 / 旅行备注</div><div style="font-size:13px;line-height:1.7;white-space:pre-wrap">${esc(c.notes||'暂无备注')}</div><div class="actions"><button onclick="voteCity('${c.id}')">♥ 我想去（${c.votes||0}）</button><button class="secondary" onclick="editCity('${c.id}')">编辑档案</button><button class="danger" onclick="deleteCity('${c.id}')">删除</button></div>`;document.querySelectorAll('.city-item').forEach(el=>el.classList.remove('active'));const active=[...document.querySelectorAll('.city-item')].find(el=>el.getAttribute('onclick')===`showDetail('${id}')`);if(active)active.classList.add('active')}
+function showDetail(id){selectedId=id;const c=cities.find(x=>x.id===id);if(!c)return;showCityMap(c);const total=[c.transport,c.hotel,c.other_cost].every(x=>x!==null&&x!==undefined&&x!=='')?[c.transport,c.hotel,c.other_cost].reduce((a,b)=>a+Number(b),0):null;$('detailPanel').innerHTML=`<div class="city-title"><h2>${esc(c.name)}</h2><span class="pill">${esc(c.status||'考虑中')}</span></div><div class="stats"><div class="stat"><small>人均交通费</small><strong>${money(c.transport)}</strong></div><div class="stat"><small>人均住宿预算</small><strong>${money(c.hotel)}</strong></div><div class="stat"><small>其他预算</small><strong>${money(c.other_cost)}</strong></div><div class="stat"><small>预计人均合计</small><strong>${money(total)}</strong></div></div><div class="subhead">想去的景点</div><ul class="list">${(c.attractions||[]).length?c.attractions.map(x=>'<li>'+esc(x)+'</li>').join(''):'<li class="muted">还没添加景点</li>'}</ul><div class="subhead">交通 / 旅行备注</div><div style="font-size:13px;line-height:1.7;white-space:pre-wrap">${esc(c.notes||'暂无备注')}</div><div class="actions"><button onclick="voteCity('${c.id}')">♥ 我想去（${c.votes||0}）</button><button class="secondary" onclick="editCity('${c.id}')">编辑档案</button><button class="danger" onclick="deleteCity('${c.id}')">删除</button></div>`;document.querySelectorAll('.city-item').forEach(el=>el.classList.remove('active'));const active=[...document.querySelectorAll('.city-item')].find(el=>el.getAttribute('onclick')===`showDetail('${id}')`);if(active)active.classList.add('active')}
 async function addAt(lat,lng){
   modal(`<h2>添加候选城市</h2>
   <p>输入城市名称，自动搜索准确位置；也可以手动调整坐标。</p >
