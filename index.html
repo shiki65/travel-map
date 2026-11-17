@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>一起去哪儿｜旅行共创地图</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--cream:#fbf8f0;--paper:#fffdf8;--ink:#34443b;--muted:#7d897f;--green:#829b86;--green2:#e8efe6;--yellow:#f3e6bd;--line:#e9e5da;--rose:#d99a87;--shadow:0 8px 28px #46544812}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+button,input,textarea,select{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--green);color:white;font-weight:650}button.secondary{background:var(--green2);color:var(--ink)}button.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}button.danger{background:#f6e7e2;color:#925d4e}
+header{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fffdf8dd;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:500}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:40px;height:40px;border-radius:14px;background:var(--green2);display:grid;place-items:center;font-size:22px}.brand h1{font-size:19px;margin:0;letter-spacing:.03em}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.room{font-size:12px;color:var(--muted);background:var(--green2);padding:9px 11px;border-radius:999px}
+main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(340px,.85fr);gap:16px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.map-head{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px}.map-head h2,.section-title{font-size:16px;margin:0}.hint{font-size:12px;color:var(--muted);margin-top:4px}
+#map{height:calc(100vh - 220px);min-height:480px;background:#e9eee6}
+.map-foot{padding:10px 16px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.side{display:flex;flex-direction:column;gap:14px}.card{padding:17px}.card h2{font-size:17px;margin:0 0 12px}.empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;background:#f8f6ef;border-radius:14px}
+.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:12px;color:var(--muted);font-weight:650}.field input,.field textarea,.field select{border:1px solid var(--line);border-radius:11px;background:#fffefa;padding:10px 11px;color:var(--ink);outline:none;width:100%}.field textarea{min-height:74px;resize:vertical}.field input:focus,.field textarea:focus{border-color:var(--green)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.city-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.city-title h2{font-size:21px;margin:0}.pill{font-size:11px;padding:5px 9px;border-radius:99px;background:var(--yellow);color:#76643c}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.stat{background:#f5f4eb;padding:11px;border-radius:13px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:19px;display:block;margin-top:4px}.subhead{font-size:12px;color:var(--muted);font-weight:700;margin:16px 0 7px}.list{padding-left:19px;margin:0;font-size:13px;line-height:1.8}.tagrow{display:flex;gap:6px;flex-wrap:wrap}.tag{background:var(--green2);border-radius:99px;padding:5px 9px;font-size:11px}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.city-list{display:flex;flex-direction:column;gap:7px;max-height:210px;overflow:auto}.city-item{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:9px 10px;text-align:left;background:#fffefa;color:var(--ink)}.city-item.active{border-color:var(--green);background:#f2f6ef}.city-item small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.vote{background:#f8f4e8;color:#7a6738;border-radius:99px;padding:5px 8px;font-size:11px;white-space:nowrap}
+.comments{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}.comment{background:#f8f6ef;border-radius:12px;padding:9px 11px;font-size:12px}.comment b{display:block;margin-bottom:3px}.muted{color:var(--muted)}.footnote{font-size:11px;line-height:1.6;color:var(--muted);padding:0 18px 16px}
+.modal-back{position:fixed;inset:0;background:#26342f66;display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}.modal{background:var(--paper);border-radius:20px;padding:20px;width:min(520px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px;font-size:18px}.modal p{font-size:13px;color:var(--muted);line-height:1.6}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#34443b;color:white;padding:10px 15px;border-radius:99px;font-size:12px;display:none;z-index:2000}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:12px}#map{height:52vh;min-height:340px}.side{display:grid;grid-template-columns:1fr}.map-head{padding:13px}.card{padding:15px}header{padding:13px 15px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">🧭</div><div><h1>一起去哪儿</h1><p>把想去的地方放上地图，一起商量下一站</p></div></div>
+ <div class="top-actions"><span class="room" id="roomBadge">房间：尚未加入</span><button class="secondary" id="inviteBtn">邀请朋友</button><button id="roomBtn">加入 / 创建旅行房间</button></div>
+</header>
+<main>
+ <section class="panel">
+  <div class="map-head"><div><h2>我们的候选地图</h2><div class="hint">点击地图上的位置，添加一个候选城市</div></div><button class="secondary" id="addBtn">＋ 添加城市</button></div>
+  <div id="map"></div>
+  <div class="map-foot"><span>✦ 奶油色地图 · 点击标记查看城市档案</span><span id="syncStatus">尚未连接协作空间</span></div>
+ </section>
+ <aside class="side">
+  <section class="panel card">
+   <h2 class="section-title">城市候选清单 <span class="muted" id="cityCount">0 个</span></h2>
+   <div class="city-list" id="cityList"><div class="empty">地图上还没有城市。先把心动目的地标出来吧。</div></div>
+  </section>
+  <section class="panel card" id="detailPanel">
+   <div class="empty">选择地图上的一个城市，<br>这里就会显示它的旅行档案。</div>
+  </section>
+  <section class="panel card">
+   <h2>大家的讨论</h2>
+   <div class="comments" id="comments"><div class="empty">还没有留言，想到什么就写下来吧。</div></div>
+   <div class="field"><label>你的名字</label><input id="commentName" placeholder="例如：小四"></div>
+   <div class="field"><label>留言</label><textarea id="commentText" placeholder="我觉得……"></textarea></div>
+   <button id="sendComment">发送留言</button>
+  </section>
+  <section class="panel card">
+   <h2>预算快速比较</h2>
+   <div id="budgetSummary" class="empty">添加城市并填写预算后，这里会自动比较人均费用。</div>
+  </section>
+ </aside>
+</main>
+<div class="footnote">提示：这是旅行讨论工具，交通费和预算由成员手动填写，实际票价请以购票平台为准。地图底图由 OpenStreetMap 提供。</div>
+<div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "在这里填入你的 Supabase Project URL";
+const SUPABASE_ANON_KEY = "在这里填入你的 Supabase anon public key";
+let db=null, roomCode=localStorage.getItem("travel_room")||"", selectedId=null, cities=[], comments=[], channel=null;
+const $=id=>document.getElementById(id);
+const map=L.map('map',{scrollWheelZoom:true}).setView([35.8,105.5],4);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(map);
+const pins={};
+const money=n=>n===null||n===undefined||n===""?"未填写":"¥"+Number(n).toLocaleString("zh-CN");
+function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2400)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function isConfigured(){return db && roomCode}
+function status(s){$('syncStatus').textContent=s}
+function modal(content){$('modal').innerHTML=content;$('modalBack').style.display='flex'}
+function closeModal(){$('modalBack').style.display='none'}
+$('modalBack').addEventListener('click',e=>{if(e.target===$('modalBack'))closeModal()});
+function getClient(){if(SUPABASE_URL.startsWith('http')&&!SUPABASE_ANON_KEY.startsWith('在这里')){db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);return true}return false}
+function openRoomDialog(){modal(`<h2>创建或加入旅行房间</h2><p>输入一个房间代号。把同一个代号分享给朋友，他们就能看到并共同编辑同一份地图。建议使用不容易猜到的组合，例如「春日北方-4821」。</p><div class="field"><label>房间代号</label><input id="roomInput" value="${esc(roomCode)}" placeholder="例如：春日北方-4821"></div><div class="field"><label>你的昵称</label><input id="nickInput" value="${esc(localStorage.getItem('travel_nick')||'')}" placeholder="例如：小四"></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="joinRoom()">进入房间</button></div>`)}
+window.joinRoom=async()=>{const code=$('roomInput').value.trim(),nick=$('nickInput').value.trim();if(!code){toast('请填写房间代号');return}roomCode=code;localStorage.setItem('travel_room',code);if(nick)localStorage.setItem('travel_nick',nick);closeModal();$('roomBadge').textContent='房间：'+code;if(!getClient()){status('待配置在线数据库');toast('房间已保存。要开启多人同步，请先完成部署配置');render();return}await loadAll();subscribe();status('在线同步已连接');toast('已进入旅行房间')};
+$('roomBtn').onclick=openRoomDialog;
+$('inviteBtn').onclick=()=>{if(!roomCode){toast('请先创建或加入房间');openRoomDialog();return}const msg=`来一起规划旅行吧！打开旅行地图网页，输入房间代号：${roomCode}`;if(navigator.share)navigator.share({title:'一起去哪儿',text:msg}).catch(()=>{});else navigator.clipboard?.writeText(msg).then(()=>toast('邀请信息已复制'))};
+function subscribe(){if(channel)db.removeChannel(channel);channel=db.channel('room-'+roomCode).on('postgres_changes',{event:'*',schema:'public',table:'travel_cities',filter:'room_code=eq.'+roomCode},()=>loadCities()).on('postgres_changes',{event:'*',schema:'public',table:'travel_comments',filter:'room_code=eq.'+roomCode},()=>loadComments()).subscribe()}
+async function loadAll(){await Promise.all([loadCities(),loadComments()])}
+async function loadCities(){if(!isConfigured())return;const {data,error}=await db.from('travel_cities').select('*').eq('room_code',roomCode).order('created_at');if(error){toast('读取城市失败：'+error.message);return}cities=data||[];render()}
+async function loadComments(){if(!isConfigured())return;const {data,error}=await db.from('travel_comments').select('*').eq('room_code',roomCode).order('created_at');if(error)return;comments=data||[];renderComments()}
+function render(){Object.values(pins).forEach(p=>map.removeLayer(p));Object.keys(pins).forEach(k=>delete pins[k]);cities.forEach(c=>{const m=L.marker([c.lat,c.lng]).addTo(map).bindTooltip(esc(c.name));m.on('click',()=>showDetail(c.id));pins[c.id]=m});$('cityCount').textContent=cities.length+' 个';$('cityList').innerHTML=cities.length?cities.map(c=>`<button class="city-item ${c.id===selectedId?'active':''}" onclick="showDetail('${c.id}')"><span><b>${esc(c.name)}</b><small>${esc(c.status||'考虑中')} · 交通 ${money(c.transport)}</small></span><span class="vote">♥ ${c.votes||0}</span></button>`).join(''):'<div class="empty">地图上还没有城市。先把心动目的地标出来吧。</div>';renderBudget();if(selectedId&&cities.some(c=>c.id===selectedId))showDetail(selectedId);else if(!selectedId)$('detailPanel').innerHTML='<div class="empty">选择地图上的一个城市，<br>这里就会显示它的旅行档案。</div>'}
+function showDetail(id){selectedId=id;const c=cities.find(x=>x.id===id);if(!c)return;map.panTo([c.lat,c.lng]);$('detailPanel').innerHTML=`<div class="city-title"><h2>${esc(c.name)}</h2><span class="pill">${esc(c.status||'考虑中')}</span></div><div class="stats"><div class="stat"><small>人均交通费</small><strong>${money(c.transport)}</strong></div><div class="stat"><small>人均住宿预算</small><strong>${money(c.hotel)}</strong></div><div class="stat"><small>其他预算</small><strong>${money(c.other_cost)}</strong></div><div class="stat"><small>预计人均合计</small><strong>${money([c.transport,c.hotel,c.other_cost].every(x=>x!==null&&x!==undefined&&x!=='')?[c.transport,c.hotel,c.other_cost].reduce((a,b)=>a+Number(b),0):null)}</strong></div></div><div class="subhead">想去的景点</div><ul class="list">${(c.attractions||[]).length?c.attractions.map(x=>'<li>'+esc(x)+'</li>').join(''):'<li class="muted">还没添加景点</li>'}</ul><div class="subhead">交通 / 旅行备注</div><div style="font-size:13px;line-height:1.7;white-space:pre-wrap">${esc(c.notes||'暂无备注')}</div><div class="actions"><button onclick="voteCity('${c.id}')">♥ 我想去（${c.votes||0}）</button><button class="secondary" onclick="editCity('${c.id}')">编辑档案</button><button class="danger" onclick="deleteCity('${c.id}')">删除</button></div>`;render()}
+function addAt(lat,lng){modal(`<h2>添加候选城市</h2><p>已记录地图位置。填写城市名称后，可以继续补充交通、景点和预算。</p><div class="field"><label>城市名称</label><input id="newName" placeholder="例如：哈尔滨"></div><div class="two"><div class="field"><label>纬度</label><input id="newLat" value="${lat.toFixed(5)}"></div><div class="field"><label>经度</label><input id="newLng" value="${lng.toFixed(5)}"></div></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="createCity()">添加城市</button></div>`)}
+window.createCity=async()=>{const name=$('newName').value.trim(),lat=Number($('newLat').value),lng=Number($('newLng').value);if(!name){toast('请填写城市名称');return}const c={id:crypto.randomUUID(),room_code:roomCode||'local',name,lat,lng,status:'考虑中',transport:null,hotel:null,other_cost:null,attractions:[],notes:'',votes:0};if(isConfigured()){const {error}=await db.from('travel_cities').insert(c);if(error){toast(error.message);return}await loadCities()}else{cities.push(c);render()}selectedId=c.id;closeModal();showDetail(c.id);toast('城市已添加')}
+map.on('click',e=>addAt(e.latlng.lat,e.latlng.lng));
+$('addBtn').onclick=()=>{const center=map.getCenter();addAt(center.lat,center.lng)};
+window.editCity=id=>{const c=cities.find(x=>x.id===id);if(!c)return;modal(`<h2>编辑城市档案</h2><div class="field"><label>城市名称</label><input id="eName" value="${esc(c.name)}"></div><div class="two"><div class="field"><label>人均交通费（元）</label><input id="eTransport" type="number" min="0" value="${c.transport??''}"></div><div class="field"><label>人均住宿费（元）</label><input id="eHotel" type="number" min="0" value="${c.hotel??''}"></div></div><div class="two"><div class="field"><label>其他人均预算（元）</label><input id="eOther" type="number" min="0" value="${c.other_cost??''}"></div><div class="field"><label>状态</label><select id="eStatus">${['考虑中','比较中','已选定','暂不考虑'].map(s=>`<option ${c.status===s?'selected':''}>${s}</option>`).join('')}</select></div></div><div class="field"><label>想去的景点（每行一个）</label><textarea id="eAttractions">${esc((c.attractions||[]).join('\n'))}</textarea></div><div class="field"><label>备注 / 交通方式 / 美食想法</label><textarea id="eNotes">${esc(c.notes||'')}</textarea></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="saveCity('${id}')">保存档案</button></div>`)}
+window.saveCity=async id=>{const val=id=>$(id).value;const num=id=>val(id)===''?null:Number(val(id));const patch={name:val('eName').trim(),transport:num('eTransport'),hotel:num('eHotel'),other_cost:num('eOther'),status:val('eStatus'),attractions:val('eAttractions').split('\n').map(x=>x.trim()).filter(Boolean),notes:val('eNotes')};if(isConfigured()){const {error}=await db.from('travel_cities').update(patch).eq('id',id).eq('room_code',roomCode);if(error){toast(error.message);return}await loadCities()}else{Object.assign(cities.find(c=>c.id===id),patch);render()}closeModal();showDetail(id);toast('档案已保存')}
+window.deleteCity=async id=>{if(!confirm('确定删除这个城市及其档案吗？'))return;if(isConfigured()){const {error}=await db.from('travel_cities').delete().eq('id',id).eq('room_code',roomCode);if(error){toast(error.message);return}await loadCities()}else{cities=cities.filter(c=>c.id!==id);selectedId=null;render()}toast('已删除')}
+window.voteCity=async id=>{const c=cities.find(x=>x.id===id);if(!c)return;const key='voted_'+roomCode+'_'+id;if(localStorage.getItem(key)){toast('你已经给这个城市投过票啦');return}const n=(c.votes||0)+1;if(isConfigured()){const {error}=await db.from('travel_cities').update({votes:n}).eq('id',id).eq('room_code',roomCode);if(error){toast(error.message);return}await loadCities()}else{c.votes=n;render()}localStorage.setItem(key,'1');toast('投票成功！')}
+function renderComments(){$('comments').innerHTML=comments.length?comments.map(c=>`<div class="comment"><b>${esc(c.nickname||'旅行伙伴')}</b>${esc(c.body)}</div>`).join(''):'<div class="empty">还没有留言，想到什么就写下来吧。</div>'}
+$('sendComment').onclick=async()=>{const body=$('commentText').value.trim(),nickname=$('commentName').value.trim()||localStorage.getItem('travel_nick')||'旅行伙伴';if(!body){toast('先写点内容吧');return}if(isConfigured()){const {error}=await db.from('travel_comments').insert({room_code:roomCode,nickname,body});if(error){toast(error.message);return}await loadComments()}else{comments.push({nickname,body});renderComments()}$('commentText').value='';toast('留言已发送')}
+function renderBudget(){const rows=cities.filter(c=>[c.transport,c.hotel,c.other_cost].some(x=>x!==null&&x!==undefined&&x!=='' )).map(c=>({name:c.name,total:[c.transport,c.hotel,c.other_cost].reduce((a,b)=>a+(Number(b)||0),0),complete:[c.transport,c.hotel,c.other_cost].filter(x=>x!==null&&x!==undefined&&x!=='').length})).sort((a,b)=>a.total-b.total);$('budgetSummary').innerHTML=rows.length?rows.map((r,i)=>`<div style="display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px solid var(--line);font-size:13px"><span>${i+1}. ${esc(r.name)} <small class="muted">(${r.complete}/3项已填)</small></span><b>${money(r.total)}</b></div>`).join('')+'<div class="muted" style="font-size:11px;margin-top:8px">按已填写项目相加；未填项目按 0 计入，请补全后比较。</div>':'<div class="empty">添加城市并填写预算后，这里会自动比较人均费用。</div>'}
+if(roomCode){$('roomBadge').textContent='房间：'+roomCode;if(getClient()){loadAll().then(subscribe);status('正在连接…')}else status('待配置在线数据库')}
+</script>
+</body></html>
