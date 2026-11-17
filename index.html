@@ -37,7 +37,40 @@ async function rpc(name,args={}){if(!db||!roomCode)throw Error('请先配置数�
 function openRoomDialog(){modal(`<h2>创建或加入旅行房间</h2><p>房间密钥就是你们共同使用的邀请口令。首次输入会创建房间；朋友输入完全相同的密钥即可加入。建议使用至少 20 位随机字符，避免使用生日、手机号等个人信息。请只发给同行朋友。</p><div class="field"><label>旅行房间密钥</label><input id="roomInput" value="${esc(roomCode)}" placeholder="例如：北方旅行-随机字符-8f3k9x2p"></div><div class="field"><label>你的昵称</label><input id="nickInput" value="${esc(localStorage.getItem('travel_nick')||'')}" placeholder="例如：小四"></div><div class="modal-actions"><button class="ghost" onclick="closeModal()">取消</button><button onclick="joinRoom()">进入房间</button></div>`)}
 window.joinRoom=async()=>{const c=$('roomInput').value.trim(),nick=$('nickInput').value.trim();if(c.length<12){toast('房间密钥至少填写 12 个字符');return}roomCode=c;localStorage.setItem('travel_room',c);if(nick)localStorage.setItem('travel_nick',nick);closeModal();$('roomBadge').textContent='房间：'+c.slice(0,5)+'…';if(!clientReady()){toast('先完成数据库配置，才能加入在线房间');$('syncStatus').textContent='等待数据库配置';return}try{await rpc('join_travel_room');await loadAll();if(poller)clearInterval(poller);poller=setInterval(loadAll,5000);$('syncStatus').textContent='在线同步中（约 5 秒刷新）';toast('已进入旅行房间')}catch(e){toast('加入失败：'+e.message);$('syncStatus').textContent='连接失败'}};
 $('roomBtn').onclick=openRoomDialog;
-$('inviteBtn').onclick=()=>{if(!roomCode){toast('请先创建或加入房间');openRoomDialog();return}const msg=`来一起规划旅行吧！打开旅行地图网页，输入同一个旅行房间密钥：${roomCode}`;if(navigator.share)navigator.share({title:'一起去哪儿',text:msg}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(msg).then(()=>toast('邀请信息已复制'))};
+$('inviteBtn').onclick=async()=>{
+  if(!roomCode){
+    toast('请先创建或加入房间');
+    openRoomDialog();
+    return;
+  }
+
+  const msg=`来一起规划旅行吧！
+
+旅行地图：${location.origin}
+房间密钥：${roomCode}
+
+打开网页后，点击「加入 / 创建旅行房间」，输入上面的密钥即可加入。`;
+
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(msg);
+      toast('邀请信息已复制！可以粘贴到微信发送啦');
+    }else{
+      throw Error('无法自动复制');
+    }
+  }catch(e){
+    modal(`<h2>邀请朋友</h2>
+      <p>长按下面的文字，选择复制，再发送给微信好友。</p >
+      <div class="field">
+        <textarea id="inviteText" rows="6" readonly>${esc(msg)}</textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" onclick="closeModal()">关闭</button>
+      </div>`);
+    $('inviteText').focus();
+    $('inviteText').select();
+  }
+};
 async function loadAll(){try{const d=await rpc('get_travel_data');cities=d.cities||[];comments=d.comments||[];render();renderComments();$('syncStatus').textContent='在线同步中（约 5 秒刷新）'}catch(e){$('syncStatus').textContent='同步异常：'+e.message;throw e}}
 function render(){Object.values(pins).forEach(p=>map.removeLayer(p));Object.keys(pins).forEach(k=>delete pins[k]);cities.forEach(c=>{const m=L.marker([c.lat,c.lng]).addTo(map).bindTooltip(esc(c.name));m.on('click',()=>showDetail(c.id));pins[c.id]=m});$('cityCount').textContent=cities.length+' 个';$('cityList').innerHTML=cities.length?cities.map(c=>`<button class="city-item ${c.id===selectedId?'active':''}" onclick="showDetail('${c.id}')"><span><b>${esc(c.name)}</b><small>${esc(c.status||'考虑中')} · 交通 ${money(c.transport)}</small></span><span class="vote">♥ ${c.votes||0}</span></button>`).join(''):'<div class="empty">地图上还没有城市。先把心动目的地标出来吧。</div>';renderBudget();if(selectedId&&cities.some(c=>c.id===selectedId))showDetail(selectedId);else if(!selectedId)$('detailPanel').innerHTML='<div class="empty">选择地图上的一个城市，这里就会显示旅行档案。</div>'}
 function showDetail(id){selectedId=id;const c=cities.find(x=>x.id===id);if(!c)return;const total=[c.transport,c.hotel,c.other_cost].every(x=>x!==null&&x!==undefined&&x!=='')?[c.transport,c.hotel,c.other_cost].reduce((a,b)=>a+Number(b),0):null;$('detailPanel').innerHTML=`<div class="city-title"><h2>${esc(c.name)}</h2><span class="pill">${esc(c.status||'考虑中')}</span></div><div class="stats"><div class="stat"><small>人均交通费</small><strong>${money(c.transport)}</strong></div><div class="stat"><small>人均住宿预算</small><strong>${money(c.hotel)}</strong></div><div class="stat"><small>其他预算</small><strong>${money(c.other_cost)}</strong></div><div class="stat"><small>预计人均合计</small><strong>${money(total)}</strong></div></div><div class="subhead">想去的景点</div><ul class="list">${(c.attractions||[]).length?c.attractions.map(x=>'<li>'+esc(x)+'</li>').join(''):'<li class="muted">还没添加景点</li>'}</ul><div class="subhead">交通 / 旅行备注</div><div style="font-size:13px;line-height:1.7;white-space:pre-wrap">${esc(c.notes||'暂无备注')}</div><div class="actions"><button onclick="voteCity('${c.id}')">♥ 我想去（${c.votes||0}）</button><button class="secondary" onclick="editCity('${c.id}')">编辑档案</button><button class="danger" onclick="deleteCity('${c.id}')">删除</button></div>`;document.querySelectorAll('.city-item').forEach(el=>el.classList.remove('active'));const active=[...document.querySelectorAll('.city-item')].find(el=>el.getAttribute('onclick')===`showDetail('${id}')`);if(active)active.classList.add('active')}
